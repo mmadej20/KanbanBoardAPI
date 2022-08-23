@@ -26,6 +26,15 @@ namespace KanbanBoard.Controllers
             return response == null ? NotFound() : Ok(response);
         }
 
+        [HttpGet("/all")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetAllTasks()
+        {
+            var response = await _mediator.Send(new GetAllTasks.Query());
+            return response == null ? NotFound("There is no available tasks") : Ok(response);
+        }
+
         [HttpPost("")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> AddToDo(AddToDo.Command command) => Ok(await _mediator.Send(command));

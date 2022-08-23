@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Commands
 {
-    public static class AddToDo
+    public class AddToDo
     {
         //Command
         public record Command(string Name) : IRequest<int>;

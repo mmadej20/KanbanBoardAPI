@@ -8,7 +8,7 @@ using KanbanBoard.Services.Interfaces;
 
 namespace KanbanBoard.Commands
 {
-    public static class MarkAsCancelled
+    public class MarkAsCancelled
     {
         public record Command(int Id) : IRequest<bool>;
 

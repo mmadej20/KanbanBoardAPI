@@ -2,10 +2,9 @@
 using KanbanBoard.Models;
 using KanbanBoard.Repositories;
 using KanbanBoard.Services.Interfaces;
-using MediatR;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static KanbanBoard.Queries.GetToDoById;
 
 namespace KanbanBoard.Services
 {
@@ -30,6 +29,8 @@ namespace KanbanBoard.Services
             _repository.ToDos.FirstOrDefault(i => i.Id == id).Status = status;
             return true;
         }
+
+        public async Task<IList<ToDo>> GetAllTasks() => _repository.ToDos.ToList();
 
         public async Task<ToDo> GetToDoById(int id)
         {

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
 
 namespace KanbanBoard
 {
@@ -31,10 +32,12 @@ namespace KanbanBoard
             });
 
             services.AddSingleton<Repository>();
+
             services.AddScoped<IKanbanService, KanbanService>();
 
-            services.AddMediatR(typeof(Startup).Assembly);
             services.AddAutoMapper(typeof(Startup).Assembly);
+
+            services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,8 +51,12 @@ namespace KanbanBoard
             }
 
             app.UseRouting();
-
-            app.UseMiddleware<ApiKeyMiddleware>();
+            app.UseCors((options) =>
+            {
+                options.AllowAnyOrigin();
+                options.AllowAnyMethod();
+            });
+            //app.UseMiddleware<ApiKeyMiddleware>();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

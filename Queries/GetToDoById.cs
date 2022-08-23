@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Queries
 {
-    public static class GetToDoById
+    public class GetToDoById
     {
         //Query
         public record Query(int Id) : IRequest<Response>;

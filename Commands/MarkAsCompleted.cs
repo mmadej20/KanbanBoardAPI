@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Commands
 {
-    public static class MarkAsCompleted
+    public class MarkAsCompleted
     {
         public record Command(int Id) : IRequest<bool>;
 
