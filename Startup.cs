@@ -51,11 +51,13 @@ namespace KanbanBoard
             }
 
             app.UseRouting();
+
             app.UseCors((options) =>
             {
                 options.AllowAnyOrigin();
                 options.AllowAnyMethod();
             });
+
             //app.UseMiddleware<ApiKeyMiddleware>();
             app.UseAuthorization();
 

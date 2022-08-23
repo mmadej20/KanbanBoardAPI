@@ -26,6 +26,7 @@ namespace KanbanBoard.Commands
             public async Task<int> Handle(Command request, CancellationToken cancellationToken)
             {
                 return await _kanbanService.AddToDo(request.Name);
+                await _kanbanService.AddToDo("asd");
             }
         }
     }

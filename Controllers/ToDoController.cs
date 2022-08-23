@@ -48,5 +48,10 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkAsCancelled(int id) => Ok(await _mediator.Send(new MarkAsCancelled.Command(id)));
+
+        [HttpPatch("/inProgress/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> MarkAsInProgress(int id) => Ok(await _mediator.Send(new MarkAsInProgress.Command(id)));
     }
 }
