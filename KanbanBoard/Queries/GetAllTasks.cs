@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
-using AutoMapper.Collection;
-using KanbanBoard.Models;
-using KanbanBoard.Services;
+using DataAccess.Models;
 using KanbanBoard.Services.Interfaces;
 using MediatR;
 using System.Collections.Generic;

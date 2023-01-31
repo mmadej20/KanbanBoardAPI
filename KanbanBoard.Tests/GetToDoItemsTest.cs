@@ -1,4 +1,5 @@
-using KanbanBoard.Models;
+using DataAccess.Enums;
+using DataAccess.Models;
 using KanbanBoard.Services.Interfaces;
 using Moq;
 
@@ -22,7 +23,7 @@ namespace KanbanBoard.Tests
         [Fact]
         public void StatusShouldBeChangeToInProgress()
         {
-            _mockRepo.Object.ChangeStatus(1, Enums.StatusType.InProgress);
+            _mockRepo.Object.ChangeStatus(1, StatusType.InProgress);
             var inProgressTask = _mockRepo.Object.GetToDoById(1).Result;
             Assert.StartsWith("InProgress", inProgressTask.Status.ToString());
         }

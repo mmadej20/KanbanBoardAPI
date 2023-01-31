@@ -1,10 +1,10 @@
-using KanbanBoard.Middleware;
-using KanbanBoard.Repositories;
+using DataAccess;
 using KanbanBoard.Services;
 using KanbanBoard.Services.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -31,13 +31,17 @@ namespace KanbanBoard
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "KanbanBoard", Version = "v1" });
             });
 
-            services.AddSingleton<Repository>();
-
-            services.AddScoped<IKanbanService, KanbanService>();
-
             services.AddAutoMapper(typeof(Startup).Assembly);
 
             services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddDbContext<KanbanContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("Local"));
+            });
+
+
+            services.AddScoped<IKanbanService, KanbanService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

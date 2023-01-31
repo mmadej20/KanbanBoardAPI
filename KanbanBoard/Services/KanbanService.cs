@@ -1,6 +1,6 @@
-﻿using KanbanBoard.Enums;
-using KanbanBoard.Models;
-using KanbanBoard.Repositories;
+﻿using DataAccess;
+using DataAccess.Enums;
+using DataAccess.Models;
 using KanbanBoard.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,23 +10,24 @@ namespace KanbanBoard.Services
 {
     public class KanbanService : IKanbanService
     {
-        private readonly Repository _repository;
+        private readonly KanbanContext _repository;
 
-        public KanbanService(Repository repository)
+        public KanbanService(KanbanContext repository)
         {
             _repository = repository;
         }
 
-        public async Task<int> AddToDo(string name)
+        public async Task<bool> AddToDo(string name)
         {
-            int randomId = new System.Random(6847298).Next(10000000);
-            _repository.ToDos.Add(new ToDo { Id = randomId, Status = StatusType.ToDo, Name = name });
-            return randomId;
+            var newItem = _repository.ToDos.Add(new ToDo {Status = StatusType.ToDo, Name = name });
+            await _repository.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> ChangeStatus(int id, StatusType status)
         {
             _repository.ToDos.FirstOrDefault(i => i.Id == id).Status = status;
+            await _repository.SaveChangesAsync();
             return true;
         }
 
@@ -35,7 +36,7 @@ namespace KanbanBoard.Services
         public async Task<ToDo> GetToDoById(int id)
         {
             var todo = _repository.ToDos.FirstOrDefault(x => x.Id == id);
-            return todo == null ? null : new ToDo() { Id = todo.Id, Name = todo.Name, Status = todo.Status };
+            return todo == null ? null : todo;
         }
     }
 }

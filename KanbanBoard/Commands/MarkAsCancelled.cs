@@ -1,12 +1,12 @@
-﻿using KanbanBoard.Enums;
-using KanbanBoard.Services.Interfaces;
-using MediatR;
+﻿using MediatR;
 using System.Threading.Tasks;
 using System.Threading;
+using KanbanBoard.Services.Interfaces;
+using DataAccess.Enums;
 
 namespace KanbanBoard.Commands
 {
-    public class MarkAsInProgress
+    public class MarkAsCancelled
     {
         public record Command(int Id) : IRequest<bool>;
 
@@ -21,7 +21,7 @@ namespace KanbanBoard.Commands
 
             public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
             {
-                return await _kanbanService.ChangeStatus(request.Id, StatusType.InProgress);
+                return await _kanbanService.ChangeStatus(request.Id, StatusType.Canceled);
             }
         }
     }

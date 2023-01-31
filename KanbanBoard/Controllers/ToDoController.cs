@@ -39,17 +39,17 @@ namespace KanbanBoard.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> AddToDo(AddToDo.Command command) => Ok(await _mediator.Send(command));
 
-        [HttpPatch("/complete/{id}")]
+        [HttpPatch("{id}/complete/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkAsCompleted(int id) => Ok(await _mediator.Send(new MarkAsCompleted.Command(id)));
 
-        [HttpPatch("/cancel/{id}")]
+        [HttpPatch("{id}/cancel/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkAsCancelled(int id) => Ok(await _mediator.Send(new MarkAsCancelled.Command(id)));
 
-        [HttpPatch("/inProgress/{id}")]
+        [HttpPatch("{id}/inProgress/")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> MarkAsInProgress(int id) => Ok(await _mediator.Send(new MarkAsInProgress.Command(id)));

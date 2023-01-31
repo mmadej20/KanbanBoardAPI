@@ -1,6 +1,4 @@
-﻿using KanbanBoard.Models;
-using KanbanBoard.Repositories;
-using KanbanBoard.Services.Interfaces;
+﻿using KanbanBoard.Services.Interfaces;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,11 +8,11 @@ namespace KanbanBoard.Commands
     public class AddToDo
     {
         //Command
-        public record Command(string Name) : IRequest<int>;
+        public record Command(string Name) : IRequest<bool>;
 
         //Handler
 
-        public class Handler : IRequestHandler<Command, int>
+        public class Handler : IRequestHandler<Command, bool>
         {
             private readonly IKanbanService _kanbanService;
 
@@ -23,10 +21,9 @@ namespace KanbanBoard.Commands
                 _kanbanService = kanbanService;
             }
 
-            public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
             {
                 return await _kanbanService.AddToDo(request.Name);
-                await _kanbanService.AddToDo("asd");
             }
         }
     }

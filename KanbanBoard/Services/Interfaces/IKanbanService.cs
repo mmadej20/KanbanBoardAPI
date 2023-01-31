@@ -1,5 +1,5 @@
-﻿using KanbanBoard.Enums;
-using KanbanBoard.Models;
+﻿using DataAccess.Enums;
+using DataAccess.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -25,7 +25,7 @@ namespace KanbanBoard.Services.Interfaces
         /// </summary>
         /// <param name="name">Description of item</param>
         /// <returns>ID of created item</returns>
-        Task<int> AddToDo(string name);
+        Task<bool> AddToDo(string name);
 
         /// <summary>
         /// Change status of item 

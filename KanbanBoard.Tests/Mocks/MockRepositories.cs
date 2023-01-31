@@ -1,5 +1,5 @@
-﻿using KanbanBoard.Models;
-using KanbanBoard.Repositories;
+﻿using DataAccess.Enums;
+using DataAccess.Models;
 using KanbanBoard.Services.Interfaces;
 using Moq;
 
@@ -15,22 +15,22 @@ namespace KanbanBoard.Tests.Mocks
                 {
                     Id = 10,
                     Name = "Create Tests",
-                    Status = Enums.StatusType.InProgress
+                    Status = StatusType.InProgress
                 },
                 new ToDo()
                 {
                     Id = 20,
                     Name = "Validate",
-                    Status = Enums.StatusType.ToDo
+                    Status = StatusType.ToDo
                 }
             };
 
             var mockRepo = new Mock<IKanbanService>();
             mockRepo.Setup(r => r.GetAllTasks()).ReturnsAsync(kanbanItems);
 
-            mockRepo.Setup(r => r.AddToDo(It.IsAny<string>())).ReturnsAsync((int idOfTask) =>
+            mockRepo.Setup(r => r.AddToDo(It.IsAny<string>())).ReturnsAsync((bool isCreated) =>
             {
-                return idOfTask;
+                return isCreated;
             });
 
             return mockRepo;

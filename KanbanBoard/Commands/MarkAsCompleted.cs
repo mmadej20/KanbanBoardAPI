@@ -1,8 +1,6 @@
-﻿using KanbanBoard.Enums;
-using KanbanBoard.Repositories;
+﻿using DataAccess.Enums;
 using KanbanBoard.Services.Interfaces;
 using MediatR;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 

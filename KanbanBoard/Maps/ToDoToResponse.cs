@@ -1,8 +1,5 @@
 ﻿using AutoMapper;
-using AutoMapper.Collection;
-using KanbanBoard.Enums;
-using KanbanBoard.Models;
-using System.Collections.Generic;
+using DataAccess.Models;
 using static KanbanBoard.Queries.GetToDoById;
 
 namespace KanbanBoard.Maps
