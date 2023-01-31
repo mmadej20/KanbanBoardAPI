@@ -6,6 +6,8 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6995609A-50C6-4B71-9CCA-E5878B33745E}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.Tests", "KanbanBoard.Tests\KanbanBoard.Tests.csproj", "{2CF7CEFE-07AB-49DB-B8DD-1D69ECEBFEAF}"
