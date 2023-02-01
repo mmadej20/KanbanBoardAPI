@@ -10,12 +10,16 @@ namespace DataAccess
 {
     public class KanbanContext : DbContext
     {
-        public KanbanContext(DbContextOptions options) : base(options) 
+        public KanbanContext(DbContextOptions options) : base(options)
         {
-            
+
         }
 
         public DbSet<ToDo> ToDos { get; set; }
+
+        public DbSet<Member> Members { get; set; }
+
+        public DbSet<Board> Boards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
