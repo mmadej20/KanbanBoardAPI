@@ -14,10 +14,10 @@ public class GetToDoById
     //Handler
     public class Handler : IRequestHandler<Query, Response>
     {
-        private readonly IKanbanService _kanbanService;
+        private readonly IBoardItemService _kanbanService;
         private readonly IMapper _mapper;
 
-        public Handler(IKanbanService kanbanService, IMapper mapper)
+        public Handler(IBoardItemService kanbanService, IMapper mapper)
         {
             _kanbanService = kanbanService;
             _mapper = mapper;
