@@ -2,27 +2,28 @@
 using MediatR;
 using System.Threading.Tasks;
 using System.Threading;
+using KanbanBoard.Domain;
 
 namespace KanbanBoard.Commands.Boards;
 
 public class CreateBoard
 {
-    public record Command(string Name) : IRequest<int>;
+    public record Command(string Name) : IRequest<OperationResult>;
 
     //Handler
 
-    public class Handler : IRequestHandler<Command, int>
+    public class Handler : IRequestHandler<Command, OperationResult>
     {
-        private readonly IKanbanService _kanbanService;
+        private readonly IBoardService _boardService;
 
-        public Handler(IKanbanService kanbanService)
+        public Handler(IBoardService boardService)
         {
-            _kanbanService = kanbanService;
+            _boardService = boardService;
         }
 
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await _kanbanService.AddToDo(request.Name);
+            return await _boardService.CreateBoard(request.Name);
         }
     }
 }
