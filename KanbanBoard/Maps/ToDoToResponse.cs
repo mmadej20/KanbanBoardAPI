@@ -2,14 +2,13 @@
 using DataAccess.Models;
 using static KanbanBoard.Queries.GetToDoById;
 
-namespace KanbanBoard.Maps
+namespace KanbanBoard.Maps;
+
+public class ToDoToResponse : Profile
 {
-    public class ToDoToResponse : Profile
+    public ToDoToResponse()
     {
-        public ToDoToResponse()
-        {
-            CreateMap<ToDo, Response>();
-            //CreateMap<IList<ToDo>, IList<Response>>();
-        }
+        CreateMap<ToDo, Response>();
+        //CreateMap<IList<ToDo>, IList<Response>>();
     }
 }

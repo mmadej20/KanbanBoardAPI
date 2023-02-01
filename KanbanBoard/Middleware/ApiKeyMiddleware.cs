@@ -3,37 +3,36 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Middleware
+namespace KanbanBoard.Middleware;
+
+public class ApiKeyMiddleware
 {
-    public class ApiKeyMiddleware
+    private readonly RequestDelegate _next;
+
+    private const string APIKEY = "XApiKey";
+
+    public ApiKeyMiddleware(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
+        _next = next;
+    }
 
-        private const string APIKEY = "XApiKey";
-
-        public ApiKeyMiddleware(RequestDelegate next)
+    public async Task InvokeAsync(HttpContext context)
+    {
+        if (!context.Request.Headers.TryGetValue(APIKEY, out
+                var providedApiKey))
         {
-            _next = next;
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsync("API Key is invalid or not provided");
+            return;
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        var appSettings = context.RequestServices.GetRequiredService<IConfiguration>();
+        var correctApiKey = appSettings.GetValue<string>(APIKEY);
+        if (!correctApiKey.Equals(providedApiKey))
         {
-            if (!context.Request.Headers.TryGetValue(APIKEY, out
-                    var providedApiKey))
-            {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("API Key is invalid or not provided");
-                return;
-            }
-            var appSettings = context.RequestServices.GetRequiredService<IConfiguration>();
-            var correctApiKey = appSettings.GetValue<string>(APIKEY);
-            if (!correctApiKey.Equals(providedApiKey))
-            {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("API Key is invalid or not provided");
-                return;
-            }
-            await _next(context);
+            context.Response.StatusCode = 401;
+            await context.Response.WriteAsync("API Key is invalid or not provided");
+            return;
         }
+        await _next(context);
     }
 }
