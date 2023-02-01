@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Controllers;
 
+[Route("api/[controller]")]
 [ApiController]
-public class ToDoController : ControllerBase
+public class BoardItemController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public ToDoController(IMediator mediator)
+    public BoardItemController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    [HttpGet("/{id}")]
+    [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetToDoById(int id)
@@ -26,7 +27,7 @@ public class ToDoController : ControllerBase
         return response == null ? NotFound() : Ok(response);
     }
 
-    [HttpGet("/all")]
+    [HttpGet("all")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllTasks()
@@ -35,7 +36,7 @@ public class ToDoController : ControllerBase
         return response == null ? NotFound("There is no available tasks") : Ok(response);
     }
 
-    [HttpPost("")]
+    [HttpPost("add")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> AddToDo(AddToDo.Command command) => Ok(await _mediator.Send(command));
 

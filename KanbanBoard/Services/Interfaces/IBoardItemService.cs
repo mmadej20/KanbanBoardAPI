@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Services.Interfaces;
 
-public interface IKanbanService
+public interface IBoardItemService
 {
     /// <summary>
     /// 

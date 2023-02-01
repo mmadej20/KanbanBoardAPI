@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Services;
 
-public class KanbanService : IKanbanService
+public class BoardItemService : IBoardItemService
 {
     private readonly KanbanContext _repository;
 
-    public KanbanService(KanbanContext repository)
+    public BoardItemService(KanbanContext repository)
     {
         _repository = repository;
     }
