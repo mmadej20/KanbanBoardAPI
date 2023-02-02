@@ -20,7 +20,7 @@ public class BoardService : IBoardService
 
     public async Task<OperationResult> AddMemberToBoard(int boardId, int memberId)
     {
-        var boardToUpdate = await GetBoard(boardId);
+        var boardToUpdate = await GetBoardById(boardId);
 
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
@@ -52,7 +52,7 @@ public class BoardService : IBoardService
 
     public async Task<OperationResult> DeleteBoard(int boardId)
     {
-        var boardToRemove = await GetBoard(boardId);
+        var boardToRemove = await GetBoardById(boardId);
 
         if (boardToRemove == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
@@ -69,7 +69,7 @@ public class BoardService : IBoardService
 
     public async Task<OperationResult> RemoveMemberFromBoard(int boardId, int memberId)
     {
-        var boardToUpdate = await GetBoard(boardId);
+        var boardToUpdate = await GetBoardById(boardId);
 
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
@@ -92,7 +92,7 @@ public class BoardService : IBoardService
 
     public async Task<OperationResult> UpdateBoardName(int boardId, string newName)
     {
-        var boardToUpdate = await GetBoard(boardId);
+        var boardToUpdate = await GetBoardById(boardId);
 
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
@@ -107,7 +107,7 @@ public class BoardService : IBoardService
 
     public async Task<OperationResult> AddItemToBoard(int boardId, int itemId)
     {
-        var boardToUpdate = await GetBoard(boardId);
+        var boardToUpdate = await GetBoardById(boardId);
 
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
@@ -125,7 +125,7 @@ public class BoardService : IBoardService
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
-    public async Task<Board> GetBoard(int boardId) => await _kanbanContext.Boards.FindAsync(boardId);
+    public async Task<Board> GetBoardById(int boardId) => await _kanbanContext.Boards.FindAsync(boardId);
 
     /// <returns>Affected entries of update command</returns>
     private async Task<int> UpdateBoard(Board boardToUpdate)
