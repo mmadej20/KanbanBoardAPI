@@ -26,7 +26,7 @@ public interface IBoardService
     /// </summary>
     /// <param name="boardId">ID of board</param>
     /// <returns>Board with members and tasks</returns>
-    Task<Board> GetBoard(int boardId);
+    Task<Board> GetBoardById(int boardId);
 
     /// <summary>
     /// Change board name to new one
