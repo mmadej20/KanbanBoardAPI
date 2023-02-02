@@ -9,11 +9,11 @@ namespace KanbanBoard.Commands.BoardItems;
 public class AddToDo
 {
     //Command
-    public record Command(string Name) : IRequest<OperationResult>;
+    public record Command(string Name) : IRequest<int>;
 
     //Handler
 
-    public class Handler : IRequestHandler<Command, OperationResult>
+    public class Handler : IRequestHandler<Command, int>
     {
         private readonly IBoardItemService _kanbanService;
 
@@ -22,7 +22,7 @@ public class AddToDo
             _kanbanService = kanbanService;
         }
 
-        public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
         {
             return await _kanbanService.AddToDo(request.Name);
         }

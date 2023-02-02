@@ -18,15 +18,15 @@ public class BoardItemService : IBoardItemService
         _repository = repository;
     }
 
-    public async Task<OperationResult> AddToDo(string name)
+    public async Task<int> AddToDo(string name)
     {
-        await _repository.ToDos.AddAsync(new ToDo { Status = StatusType.ToDo, Name = name });
+        var addedTask = await _repository.ToDos.AddAsync(new ToDo { Status = StatusType.ToDo, Name = name });
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"Task {name} has been created" };
+            return addedTask.Entity.Id;
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return -1;
     }
 
     public async Task<OperationResult> ChangeStatus(int id, StatusType status)

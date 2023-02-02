@@ -24,7 +24,7 @@ namespace KanbanBoard.Tests
         {
             var result = _boardItemService.AddToDo("TestTask");
 
-            Assert.True(result.Result.IsSuccesfull);
+            Assert.NotEqual(-1,result.Result);
         }
 
         [Fact]
