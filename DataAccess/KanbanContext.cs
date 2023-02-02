@@ -10,16 +10,20 @@ namespace DataAccess
 {
     public class KanbanContext : DbContext
     {
+        public KanbanContext()
+        {
+
+        }
         public KanbanContext(DbContextOptions options) : base(options)
         {
 
         }
 
-        public DbSet<ToDo> ToDos { get; set; }
+        public virtual DbSet<ToDo> ToDos { get; set; }
 
-        public DbSet<Member> Members { get; set; }
+        public virtual DbSet<Member> Members { get; set; }
 
-        public DbSet<Board> Boards { get; set; }
+        public virtual DbSet<Board> Boards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
