@@ -3,14 +3,15 @@ using System.Threading.Tasks;
 using System.Threading;
 using KanbanBoard.Services.Interfaces;
 using DataAccess.Enums;
+using KanbanBoard.Domain;
 
 namespace KanbanBoard.Commands.BoardItems;
 
 public class MarkAsCancelled
 {
-    public record Command(int Id) : IRequest<int>;
+    public record Command(int Id) : IRequest<OperationResult>;
 
-    public class Handler : IRequestHandler<Command, int>
+    public class Handler : IRequestHandler<Command, OperationResult>
     {
         private readonly IBoardItemService _kanbanService;
 
@@ -19,7 +20,7 @@ public class MarkAsCancelled
             _kanbanService = kanbanService;
         }
 
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
         {
             return await _kanbanService.ChangeStatus(request.Id, StatusType.Canceled);
         }

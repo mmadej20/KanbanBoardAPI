@@ -1,5 +1,6 @@
 ﻿using DataAccess.Enums;
 using DataAccess.Models;
+using KanbanBoard.Domain;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -25,7 +26,7 @@ public interface IBoardItemService
     /// </summary>
     /// <param name="name">Description of item</param>
     /// <returns>Number of affected entries</returns>
-    Task<int> AddToDo(string name);
+    Task<OperationResult> AddToDo(string name);
 
     /// <summary>
     /// Change status of item 
@@ -33,5 +34,5 @@ public interface IBoardItemService
     /// <param name="id">Item ID</param>
     /// <param name="status">Type of status</param>
     /// <returns>Number of affected entries</returns>
-    Task<int> ChangeStatus(int id, StatusType status);
+    Task<OperationResult> ChangeStatus(int id, StatusType status);
 }

@@ -1,6 +1,7 @@
 ﻿using DataAccess;
 using DataAccess.Enums;
 using DataAccess.Models;
+using KanbanBoard.Domain;
 using KanbanBoard.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,18 +18,26 @@ public class BoardItemService : IBoardItemService
         _repository = repository;
     }
 
-    public async Task<int> AddToDo(string name)
+    public async Task<OperationResult> AddToDo(string name)
     {
-        await _repository.ToDos.AddAsync(new ToDo {Status = StatusType.ToDo, Name = name });
+        await _repository.ToDos.AddAsync(new ToDo { Status = StatusType.ToDo, Name = name });
         var affectedEntries = await _repository.SaveChangesAsync();
-        return affectedEntries;
+
+        if (affectedEntries > 0)
+            return new OperationResult { IsSuccesfull = true, Message = $"Task {name} has been created" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
-    public async Task<int> ChangeStatus(int id, StatusType status)
+    public async Task<OperationResult> ChangeStatus(int id, StatusType status)
     {
         _repository.ToDos.FirstOrDefault(i => i.Id == id).Status = status;
         var affectedEntries = await _repository.SaveChangesAsync();
-        return affectedEntries;
+
+        if (affectedEntries > 0)
+            return new OperationResult { IsSuccesfull = true, Message = "Task status has been changed" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
     public async Task<IList<ToDo>> GetAllTasks() => _repository.ToDos.ToList();
