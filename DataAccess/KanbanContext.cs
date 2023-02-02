@@ -1,4 +1,5 @@
-﻿using DataAccess.Models;
+﻿using DataAccess.Enums;
+using DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,9 @@ namespace DataAccess
             modelBuilder.Entity<ToDo>()
                 .Property(s => s.Status)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<Board>()
+                .Navigation(n => n.ToDoItems).AutoInclude();
 
             base.OnModelCreating(modelBuilder);
         }
