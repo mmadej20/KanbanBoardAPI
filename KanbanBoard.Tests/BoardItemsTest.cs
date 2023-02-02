@@ -9,13 +9,13 @@ namespace KanbanBoard.Tests
 {
     public class BoardItemsTest : IClassFixture<KanbanDatabaseFixture>
     {
-        private readonly BoardItemService _mockService;
+        //private readonly BoardItemService _mockService;
 
         private readonly BoardItemService _boardItemService;
 
         public BoardItemsTest(KanbanDatabaseFixture fixture)
         {
-            _mockService = Mocks.MockRepositories.GetToDoService();
+            //_mockService = Mocks.MockRepositories.GetToDoService();
             _boardItemService = FixtureDatabase.GetBoardItemServiceWithFixtureDatabase(fixture);
         }
 

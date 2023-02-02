@@ -29,7 +29,7 @@ namespace KanbanBoard.Tests.DatabaseFixture
                     {
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
-                        context.AddRange(
+                        context.ToDos.AddRange(
                         new ToDo { Name = "Task432", Status = StatusType.ToDo},
                             new ToDo { Name = "Task999", Status = StatusType.OnHold });
                         context.SaveChanges();
@@ -49,7 +49,7 @@ namespace KanbanBoard.Tests.DatabaseFixture
 
     public static class FixtureDatabase
     {
-        public static BoardItemService GetBoardItemWithFixtureDatabase(KanbanDatabaseFixture fixture)
+        public static BoardItemService GetBoardItemServiceWithFixtureDatabase(KanbanDatabaseFixture fixture)
         {
             var mockRepo = new BoardItemService(fixture.CreateContext());
 
