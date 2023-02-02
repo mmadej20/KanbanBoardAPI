@@ -36,7 +36,7 @@ namespace KanbanBoard.Tests
         [Fact]
         public void StatusShouldBeChangeToInProgress()
         {
-            _boardItemService.ChangeStatus(1, StatusType.InProgress).GetAwaiter();
+            _boardItemService.ChangeStatus(1, StatusType.InProgress).Wait();
             var inProgressTask = _boardItemService.GetToDoById(1).Result;
             Assert.StartsWith("InProgress", inProgressTask.Status.ToString());
         }
