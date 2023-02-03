@@ -12,10 +12,12 @@ namespace KanbanBoard.Services;
 public class BoardService : IBoardService
 {
     private readonly KanbanContext _kanbanContext;
+    private readonly IBoardItemService _boardItemService;
 
-    public BoardService(KanbanContext kanbanContext)
+    public BoardService(KanbanContext kanbanContext, IBoardItemService boardItemService)
     {
         _kanbanContext = kanbanContext;
+        _boardItemService = boardItemService;
     }
 
     public async Task<OperationResult> AddMemberToBoard(int boardId, int memberId)
@@ -123,6 +125,34 @@ public class BoardService : IBoardService
             return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
 
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+    }
+
+    public async Task<OperationResult> AddItemToBoard(Board board, int itemId)
+    {
+        var toDoItem = await _boardItemService.GetToDoById(itemId);
+        board.ToDoItems.Add(toDoItem);
+
+        if (await UpdateBoard(board) > 0)
+            return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+    }
+
+    public async Task<OperationResult> CreateItemInBoard(int boardId, string taskName)
+    {
+        var boardToUpdate = await GetBoardById(boardId);
+
+        if (boardToUpdate == null)
+            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+
+        var newTaskId = await _boardItemService.AddToDo(taskName);
+
+        if (newTaskId == -1)
+            return new OperationResult { IsSuccesfull = false, Message = "Failed to create task" };
+
+        var result = await AddItemToBoard(boardToUpdate, newTaskId);
+
+        return result;
     }
 
     public async Task<Board> GetBoardById(int boardId) => await _kanbanContext.Boards.FindAsync(boardId);

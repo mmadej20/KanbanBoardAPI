@@ -15,21 +15,15 @@ namespace KanbanBoard.Commands.Boards
         public class Handler : IRequestHandler<Command, OperationResult>
         {
             private readonly IBoardService _boardService;
-            private readonly IBoardItemService _boardItemService;
 
-            public Handler(IBoardService boardService, IBoardItemService boardItemService)
+            public Handler(IBoardService boardService)
             {
                 _boardService = boardService;
-                _boardItemService = boardItemService;
             }
 
             public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
             {
-                var newItemId = await _boardItemService.AddToDo(request.Name);
-                if (newItemId == -1)
-                    return new OperationResult { IsSuccesfull = false, Message = "Failed to create task"};
-
-                return await _boardService.AddItemToBoard(request.BoardId, newItemId);
+                return await _boardService.CreateItemInBoard(request.BoardId, request.Name);
             }
         }
     }
