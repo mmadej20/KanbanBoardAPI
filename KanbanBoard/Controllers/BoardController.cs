@@ -35,4 +35,10 @@ public class BoardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateItemInBoard(CreateItemInBoard.Command command) => Ok(await _mediator.Send(command));
+
+    [HttpDelete("delete")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteBoard(DeleteBoard.Command command) => Ok(await _mediator.Send(command));
+
 }
