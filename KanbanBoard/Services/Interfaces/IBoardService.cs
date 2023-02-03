@@ -18,8 +18,16 @@ public interface IBoardService
     /// </summary>
     /// <param name="boardId">ID of board where item is going to be added</param>
     /// <param name="itemId">ID of ToDo item</param>
-    /// <returns></returns>
+    /// <returns>Result of an operation</returns>
     Task<OperationResult> AddItemToBoard(int boardId, int itemId);
+
+    /// <summary>
+    /// Creates task and adds it to board immediatly
+    /// </summary>
+    /// <param name="boardId">ID of board where item is going to be added</param>
+    /// <param name="taskName">Name of new task</param>
+    /// <returns>Result of an operation</returns>
+    Task<OperationResult> CreateItemInBoard(int boardId, string taskName);
 
     /// <summary>
     /// Get board with members and tasks

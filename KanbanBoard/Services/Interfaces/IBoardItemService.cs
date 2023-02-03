@@ -25,7 +25,7 @@ public interface IBoardItemService
     /// Adds new item to Kanban Board
     /// </summary>
     /// <param name="name">Description of item</param>
-    /// <returns>ID of added task</returns>
+    /// <returns>ID of added task if successfull otherwise '-1'</returns>
     Task<int> AddToDo(string name);
 
     /// <summary>
