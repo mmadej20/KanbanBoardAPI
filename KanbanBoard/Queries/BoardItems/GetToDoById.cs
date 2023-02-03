@@ -4,7 +4,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Queries;
+namespace KanbanBoard.Queries.BoardItems;
 
 public class GetToDoById
 {

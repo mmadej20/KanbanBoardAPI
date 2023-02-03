@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DataAccess.Models;
-using static KanbanBoard.Queries.GetToDoById;
+using static KanbanBoard.Queries.BoardItems.GetToDoById;
 
 namespace KanbanBoard.Maps;
 

@@ -5,9 +5,9 @@ using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static KanbanBoard.Queries.GetToDoById;
+using static KanbanBoard.Queries.BoardItems.GetToDoById;
 
-namespace KanbanBoard.Queries;
+namespace KanbanBoard.Queries.BoardItems;
 
 public class GetAllTasks
 {
