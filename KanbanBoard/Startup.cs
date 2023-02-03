@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
+using Newtonsoft.Json;
 
 namespace KanbanBoard;
 
@@ -27,9 +28,14 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        //    .AddNewtonsoftJson(options =>
+        //     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+        //); 
+        //Remove JSONIgnore from properties and uncomment this to get response with full object
+
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "KanbanBoard", Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "KanbanBoard", Version = "v1", Description="Simple API to manage boards with tasks and members" });
             c.CustomSchemaIds(s => s.FullName.Replace("+", "."));
 
         });
