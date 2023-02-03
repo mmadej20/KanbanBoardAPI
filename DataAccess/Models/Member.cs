@@ -15,5 +15,7 @@ namespace DataAccess.Models
         public string Email { get; set; }
 
         public List<Board> Boards { get; set; }
+
+        public List<ToDo> ToDos { get; set; }
     }
 }
