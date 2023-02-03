@@ -52,6 +52,7 @@ public class Startup
 
         services.AddScoped<IBoardItemService, BoardItemService>();
         services.AddScoped<IBoardService, BoardService>();
+        services.AddScoped<IMemberService, MemberService>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
