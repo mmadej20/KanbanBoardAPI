@@ -4,27 +4,26 @@ using MediatR;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace KanbanBoard.Commands.Boards
+namespace KanbanBoard.Commands.Boards;
+
+public class CreateItemInBoard
 {
-    public class CreateItemInBoard
+    public record Command(int BoardId, string Name) : IRequest<OperationResult>;
+
+    //Handler
+
+    public class Handler : IRequestHandler<Command, OperationResult>
     {
-        public record Command(int BoardId, string Name) : IRequest<OperationResult>;
+        private readonly IBoardService _boardService;
 
-        //Handler
-
-        public class Handler : IRequestHandler<Command, OperationResult>
+        public Handler(IBoardService boardService)
         {
-            private readonly IBoardService _boardService;
+            _boardService = boardService;
+        }
 
-            public Handler(IBoardService boardService)
-            {
-                _boardService = boardService;
-            }
-
-            public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
-            {
-                return await _boardService.CreateItemInBoard(request.BoardId, request.Name);
-            }
+        public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
+        {
+            return await _boardService.CreateItemInBoard(request.BoardId, request.Name);
         }
     }
 }

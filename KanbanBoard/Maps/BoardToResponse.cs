@@ -2,13 +2,12 @@
 using DataAccess.Models;
 using static KanbanBoard.Queries.Boards.GetBoardById;
 
-namespace KanbanBoard.Maps
+namespace KanbanBoard.Maps;
+
+public class BoardToResponse : Profile
 {
-    public class BoardToResponse : Profile
+    public BoardToResponse() 
     {
-        public BoardToResponse() 
-        {
-            CreateMap<Board, Response>();
-        }
+        CreateMap<Board, Response>();
     }
 }

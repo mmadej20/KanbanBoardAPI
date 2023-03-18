@@ -1,10 +1,11 @@
 ﻿using DataAccess;
 using DataAccess.Models;
 using KanbanBoard.Domain;
+using KanbanBoard.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Services.Interfaces;
+namespace KanbanBoard.Services;
 
 public class MemberService : IMemberService
 {
@@ -51,7 +52,7 @@ public class MemberService : IMemberService
 
     public async Task<OperationResult> UpdateMember(int memberId, string memberName = null, string email = null)
     {
-        if(string.IsNullOrEmpty(memberName) && string.IsNullOrEmpty(email))
+        if (string.IsNullOrEmpty(memberName) && string.IsNullOrEmpty(email))
             return new OperationResult { IsSuccesfull = false, Message = $"There is nothing to update" };
 
         var memberToUpdate = await _kanbanContext.Members.FindAsync(memberId);
@@ -59,11 +60,11 @@ public class MemberService : IMemberService
         if (memberToUpdate is null)
             return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists" };
 
-        if(!string.IsNullOrWhiteSpace(memberName))
-            memberToUpdate.MemberName= memberName;
+        if (!string.IsNullOrWhiteSpace(memberName))
+            memberToUpdate.MemberName = memberName;
 
-        if(!string.IsNullOrEmpty(email))
-            memberToUpdate.Email= email;
+        if (!string.IsNullOrEmpty(email))
+            memberToUpdate.Email = email;
 
         _kanbanContext.Members.Update(memberToUpdate);
 
