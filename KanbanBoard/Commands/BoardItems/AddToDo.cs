@@ -15,9 +15,9 @@ public class AddToDo
 
     public class Handler : IRequestHandler<Command, int>
     {
-        private readonly IBoardItemService _kanbanService;
+        private readonly IBoardService _kanbanService;
 
-        public Handler(IBoardItemService kanbanService)
+        public Handler(IBoardService kanbanService)
         {
             _kanbanService = kanbanService;
         }

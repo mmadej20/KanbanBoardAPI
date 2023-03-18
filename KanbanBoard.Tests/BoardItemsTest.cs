@@ -7,37 +7,40 @@ using Moq;
 
 namespace KanbanBoard.Tests
 {
+    [CollectionDefinition("BoardItems", DisableParallelization = true)]
     public class BoardItemsTest : IClassFixture<KanbanDatabaseFixture>
     {
         //private readonly BoardItemService _mockService;
 
-        private readonly BoardItemService _boardItemService;
+        private readonly BoardService _boardService;
 
-        public BoardItemsTest(KanbanDatabaseFixture fixture)
+        public BoardItemsTest()
         {
             //_mockService = Mocks.MockRepositories.GetToDoService();
-            _boardItemService = FixtureDatabase.GetBoardItemServiceWithFixtureDatabase(fixture);
+            _boardService = ServicesWithFixtureDatabase.GetBoardItemService();
         }
 
         [Fact]
-        public void TaskShouldBeAddedToRepository()
+        public async Task TaskShouldBeAddedToRepository()
         {
-            var result = _boardItemService.AddToDo("TestTask");
+            var result = await _boardService.AddToDo("TestTask");
 
-            Assert.NotEqual(-1,result.Result);
+            Assert.NotEqual(-1, result);
         }
 
         [Fact]
-        public void GetAllTasksShouldReturnListOfToDo()
+        public async Task GetAllTasksShouldReturnListOfToDo()
         {
-            Assert.IsType<List<ToDo>>(_boardItemService.GetAllTasks().Result);
+            Assert.IsType<List<ToDo>>(await _boardService.GetAllTasks());
         }
 
         [Fact]
-        public void StatusShouldBeChangeToInProgress()
+        public async Task StatusShouldBeChangeToInProgress()
         {
-            _boardItemService.ChangeStatus(1, StatusType.InProgress).Wait();
-            var inProgressTask = _boardItemService.GetToDoById(1).Result;
+            await _boardService.ChangeStatus(1, StatusType.InProgress);
+
+            var inProgressTask = await _boardService.GetToDoById(1);
+
             Assert.StartsWith("InProgress", inProgressTask.Status.ToString());
         }
     }

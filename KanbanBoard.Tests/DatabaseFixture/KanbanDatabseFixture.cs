@@ -29,9 +29,12 @@ namespace KanbanBoard.Tests.DatabaseFixture
                     {
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
+                        context.Boards.AddRange(
+                            new Board { Name = "Board623" },
+                            new Board { Name = "BoardToDelete" });
                         context.ToDos.AddRange(
-                        new ToDo { Name = "Task432", Status = StatusType.ToDo},
-                            new ToDo { Name = "Task999", Status = StatusType.OnHold });
+                            new ToDo { Name = "Task432", Status = StatusType.ToDo, BoardId = 2 },
+                            new ToDo { Name = "Task999", Status = StatusType.OnHold, BoardId = 2 });
                         context.SaveChanges();
                     }
 
@@ -44,14 +47,17 @@ namespace KanbanBoard.Tests.DatabaseFixture
             => new KanbanContext(
                 new DbContextOptionsBuilder<KanbanContext>()
                     .UseSqlServer(ConnectionString)
+                    .EnableThreadSafetyChecks()
                     .Options);
     }
 
-    public static class FixtureDatabase
+    public static class ServicesWithFixtureDatabase
     {
-        public static BoardItemService GetBoardItemServiceWithFixtureDatabase(KanbanDatabaseFixture fixture)
+        private static KanbanContext _fixtureDatabase = new KanbanDatabaseFixture().CreateContext();
+
+        public static BoardService GetBoardItemService()
         {
-            var mockRepo = new BoardItemService(fixture.CreateContext());
+            var mockRepo = new BoardService(_fixtureDatabase);
 
             return mockRepo;
         }

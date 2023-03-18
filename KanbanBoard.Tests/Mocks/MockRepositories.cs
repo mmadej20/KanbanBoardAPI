@@ -42,11 +42,11 @@ namespace KanbanBoard.Tests.Mocks
 
             return mockContext;
         }
-        public static BoardItemService GetToDoService()
+        public static BoardService GetToDoService()
         {
             var mockContext = MockToDoDbSet();
 
-            var mockRepo = new BoardItemService(mockContext.Object);
+            var mockRepo = new BoardService(mockContext.Object);
 
             return mockRepo;
         }

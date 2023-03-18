@@ -13,9 +13,9 @@ public class MarkAsCancelled
 
     public class Handler : IRequestHandler<Command, OperationResult>
     {
-        private readonly IBoardItemService _kanbanService;
+        private readonly IBoardService _kanbanService;
 
-        public Handler(IBoardItemService kanbanService)
+        public Handler(IBoardService kanbanService)
         {
             _kanbanService = kanbanService;
         }

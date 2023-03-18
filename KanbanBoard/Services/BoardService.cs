@@ -1,9 +1,14 @@
 ﻿using AutoMapper.Execution;
 using DataAccess;
+using DataAccess.Enums;
 using DataAccess.Models;
+using KanbanBoard.Commands.BoardItems;
 using KanbanBoard.Domain;
+using KanbanBoard.Queries.BoardItems;
 using KanbanBoard.Services.Interfaces;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,13 +16,11 @@ namespace KanbanBoard.Services;
 
 public class BoardService : IBoardService
 {
-    private readonly KanbanContext _kanbanContext;
-    private readonly IBoardItemService _boardItemService;
+    private readonly KanbanContext _repository;
 
-    public BoardService(KanbanContext kanbanContext, IBoardItemService boardItemService)
+    public BoardService(KanbanContext kanbanContext)
     {
-        _kanbanContext = kanbanContext;
-        _boardItemService = boardItemService;
+        _repository = kanbanContext;
     }
 
     public async Task<OperationResult> AddMemberToBoard(int boardId, int memberId)
@@ -27,7 +30,7 @@ public class BoardService : IBoardService
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
 
-        var memberToAdd = await _kanbanContext.Members.FindAsync(memberId);
+        var memberToAdd = await _repository.Members.FindAsync(memberId);
 
         if (memberToAdd == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'" };
@@ -42,9 +45,9 @@ public class BoardService : IBoardService
 
     public async Task<OperationResult> CreateBoard(string name)
     {
-        await _kanbanContext.Boards.AddAsync(new Board { Name = name });
+        await _repository.Boards.AddAsync(new Board { Name = name });
 
-        var affectedEntries = await _kanbanContext.SaveChangesAsync();
+        var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
             return new OperationResult { IsSuccesfull = true, Message = $"Board '{name}' has been created" };
@@ -59,9 +62,9 @@ public class BoardService : IBoardService
         if (boardToRemove == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
 
-        _kanbanContext.Boards.Remove(boardToRemove);
+        _repository.Boards.Remove(boardToRemove);
 
-        var affectedEntries = await _kanbanContext.SaveChangesAsync();
+        var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
             return new OperationResult { IsSuccesfull = true, Message = $"Board '{boardToRemove.Name}' has been removed" };
@@ -76,7 +79,7 @@ public class BoardService : IBoardService
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
 
-        var memberToRemove = await _kanbanContext.Members.FindAsync(memberId);
+        var memberToRemove = await _repository.Members.FindAsync(memberId);
 
         if (memberToRemove == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'" };
@@ -114,7 +117,7 @@ public class BoardService : IBoardService
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
 
-        var itemToAdd = await _kanbanContext.ToDos.FindAsync(itemId);
+        var itemToAdd = await _repository.ToDos.FindAsync(itemId);
 
         if (itemToAdd == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no item with id '{itemId}'" };
@@ -127,10 +130,9 @@ public class BoardService : IBoardService
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
-    public async Task<OperationResult> AddItemToBoard(Board board, int itemId)
+    private async Task<OperationResult> AddItemToBoard(Board board, ToDo taskObject)
     {
-        var toDoItem = await _boardItemService.GetToDoById(itemId);
-        board.ToDoItems.Add(toDoItem);
+        board.ToDoItems.Add(taskObject);
 
         if (await UpdateBoard(board) > 0)
             return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
@@ -145,24 +147,55 @@ public class BoardService : IBoardService
         if (boardToUpdate == null)
             return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
 
-        var newTaskId = await _boardItemService.AddToDo(taskName);
+        var newTaskId = await AddToDo(taskName);
+        var newTaskObject = await _repository.ToDos.FindAsync(newTaskId);
 
         if (newTaskId == -1)
             return new OperationResult { IsSuccesfull = false, Message = "Failed to create task" };
 
-        var result = await AddItemToBoard(boardToUpdate, newTaskId);
+        var result = await AddItemToBoard(boardToUpdate, newTaskObject);
 
         return result;
     }
 
-    public async Task<Board> GetBoardById(int boardId) => await _kanbanContext.Boards.FindAsync(boardId);
+    public async Task<Board> GetBoardById(int boardId) => await _repository.Boards.FindAsync(boardId);
 
     /// <returns>Affected entries of update command</returns>
     private async Task<int> UpdateBoard(Board boardToUpdate)
     {
-        _kanbanContext.Boards.Update(boardToUpdate);
+        _repository.Boards.Update(boardToUpdate);
 
-        return await _kanbanContext.SaveChangesAsync();
+        return await _repository.SaveChangesAsync();
+    }
+
+    public async Task<int> AddToDo(string name)
+    {
+        var addedTask = await _repository.ToDos.AddAsync(new ToDo { Status = StatusType.ToDo, Name = name });
+        var affectedEntries = await _repository.SaveChangesAsync();
+
+        if (affectedEntries > 0)
+            return addedTask.Entity.Id;
+
+        return -1;
+    }
+
+    public async Task<OperationResult> ChangeStatus(int id, StatusType status)
+    {
+        _repository.ToDos.FirstOrDefault(i => i.Id == id).Status = status;
+        var affectedEntries = await _repository.SaveChangesAsync();
+
+        if (affectedEntries > 0)
+            return new OperationResult { IsSuccesfull = true, Message = "Task status has been changed" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+    }
+
+    public async Task<IList<ToDo>> GetAllTasks() => _repository.ToDos.ToList();
+
+    public async Task<ToDo> GetToDoById(int id)
+    {
+        var todo = _repository.ToDos.FirstOrDefault(x => x.Id == id);
+        return todo == null ? null : todo;
     }
 
 }

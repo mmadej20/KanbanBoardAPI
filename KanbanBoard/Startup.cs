@@ -49,8 +49,6 @@ public class Startup
             options.UseSqlServer(Configuration.GetConnectionString("Local"));
         });
 
-
-        services.AddScoped<IBoardItemService, BoardItemService>();
         services.AddScoped<IBoardService, BoardService>();
         services.AddScoped<IMemberService, MemberService>();
     }
