@@ -37,11 +37,12 @@ namespace KanbanBoard.Tests
         [Fact]
         public async Task StatusShouldBeChangeToInProgress()
         {
-            await _boardService.ChangeStatus(1, StatusType.InProgress);
+            var inProgressTask = await _boardService.ChangeStatus(1, StatusType.InProgress).ContinueWith<Task<ToDo>>((item) =>
+            {
+                return _boardService.GetToDoById(1);
+            });
 
-            var inProgressTask = await _boardService.GetToDoById(1);
-
-            Assert.StartsWith("InProgress", inProgressTask.Status.ToString());
+            Assert.StartsWith("InProgress", inProgressTask.Result.Status.ToString());
         }
     }
 }

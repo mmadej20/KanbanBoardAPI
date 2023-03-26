@@ -48,7 +48,7 @@ namespace KanbanBoard.Tests
 
             await _boardService.DeleteBoard(2);
             
-            var result = await _boardService.GetToDoById(taskAssignedToBoard.Id);
+            var result = await _boardService.GetToDoById(taskAssignedToBoard!.Id);
 
             Assert.Null(result);
         }

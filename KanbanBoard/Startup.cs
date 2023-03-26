@@ -44,10 +44,15 @@ public class Startup
 
         services.AddMediatR(AppDomain.CurrentDomain.GetAssemblies());
 
-        services.AddDbContext<KanbanContext>(options =>
+        services.AddDbContextFactory<KanbanContext>(options =>
         {
             options.UseSqlServer(Configuration.GetConnectionString("Local"));
         });
+
+        //services.AddDbContext<KanbanContext>(options =>
+        //{
+        //    options.UseSqlServer(Configuration.GetConnectionString("Local"));
+        //});
 
         services.AddScoped<IBoardService, BoardService>();
         services.AddScoped<IMemberService, MemberService>();

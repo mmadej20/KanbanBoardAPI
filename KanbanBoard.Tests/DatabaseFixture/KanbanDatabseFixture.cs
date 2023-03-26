@@ -53,13 +53,13 @@ namespace KanbanBoard.Tests.DatabaseFixture
 
     public static class ServicesWithFixtureDatabase
     {
-        private static KanbanContext _fixtureDatabase = new KanbanDatabaseFixture().CreateContext();
-
         public static BoardService GetBoardItemService()
         {
-            var mockRepo = new BoardService(_fixtureDatabase);
+            var context = new KanbanDatabaseFixture().CreateContext();
 
+            var mockRepo = new BoardService(context);
             return mockRepo;
+
         }
     }
 }
