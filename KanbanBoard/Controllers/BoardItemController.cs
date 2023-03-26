@@ -27,18 +27,18 @@ public class BoardItemController : ControllerBase
         return response == null ? NotFound() : Ok(response);
     }
 
-    [HttpGet("all")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAllTasks()
-    {
-        var response = await _mediator.Send(new GetAllTasks.Query());
-        return response == null ? NotFound("There is no available tasks") : Ok(response);
-    }
+    //[HttpGet("all")]
+    //[ProducesResponseType(StatusCodes.Status200OK)]
+    //[ProducesResponseType(StatusCodes.Status404NotFound)]
+    //public async Task<IActionResult> GetAllTasks()
+    //{
+    //    var response = await _mediator.Send(new GetAllTasks.Query());
+    //    return response == null ? NotFound("There is no available tasks") : Ok(response);
+    //}
 
-    [HttpPost("add")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> AddToDo(AddToDo.Command command) => Ok(await _mediator.Send(command));
+    //[HttpPost("add")]
+    //[ProducesResponseType(StatusCodes.Status200OK)]
+    //public async Task<IActionResult> AddToDo(AddToDo.Command command) => Ok(await _mediator.Send(command));
 
     [HttpPatch("{id}/complete/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
