@@ -37,7 +37,7 @@ public class MemberService : IMemberService
         var memberToDelete = await _kanbanContext.Members.FindAsync(memberId);
 
         if (memberToDelete is null)
-            return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists" };
+            return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists", IsNotFound = true };
 
         _kanbanContext.Remove(memberToDelete);
         var affectedEntries = await _kanbanContext.SaveChangesAsync();
@@ -58,7 +58,7 @@ public class MemberService : IMemberService
         var memberToUpdate = await _kanbanContext.Members.FindAsync(memberId);
 
         if (memberToUpdate is null)
-            return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists" };
+            return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists", IsNotFound = true };
 
         if (!string.IsNullOrWhiteSpace(memberName))
             memberToUpdate.MemberName = memberName;

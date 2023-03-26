@@ -36,6 +36,9 @@ namespace DataAccess
                 .Navigation(n => n.ToDoItems).AutoInclude();
 
             modelBuilder.Entity<Board>()
+                .Navigation(n => n.Members).AutoInclude();
+
+            modelBuilder.Entity<Board>()
                 .HasMany(m => m.ToDoItems)
                 .WithOne(o => o.Board)
                 .OnDelete(DeleteBehavior.Cascade);

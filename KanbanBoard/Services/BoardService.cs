@@ -22,27 +22,6 @@ public class BoardService : IBoardService
     {
         _repository = kanbanContext;
     }
-
-    public async Task<OperationResult> AddMemberToBoard(int boardId, int memberId)
-    {
-        var boardToUpdate = await GetBoardById(boardId);
-
-        if (boardToUpdate == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
-
-        var memberToAdd = await _repository.Members.FindAsync(memberId);
-
-        if (memberToAdd == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'" };
-
-        boardToUpdate.Members.Add(memberToAdd);
-
-        if (await UpdateBoard(boardToUpdate) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Member has beend added" };
-
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
-    }
-
     public async Task<OperationResult> CreateBoard(string name)
     {
         await _repository.Boards.AddAsync(new Board { Name = name });
@@ -72,6 +51,33 @@ public class BoardService : IBoardService
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
+    public async Task<OperationResult> AddMemberToBoard(int boardId, int memberId)
+    {
+        var boardToUpdate = await GetBoardById(boardId);
+
+        if (boardToUpdate == null)
+            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+
+        var memberToAdd = await _repository.Members.FindAsync(memberId);
+
+        if (memberToAdd == null)
+            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'" };
+
+        if (boardToUpdate.Members.Any(x => x.MemberName == memberToAdd.MemberName))
+            return new OperationResult { IsSuccesfull = false, Message = $"Member {memberToAdd.MemberName} is already assigned to this board" };
+
+        if (boardToUpdate.Members == null)
+            boardToUpdate.Members = new List<DataAccess.Models.Member> { memberToAdd };
+        else
+            boardToUpdate.Members.Add(memberToAdd);
+
+        if (await UpdateBoard(boardToUpdate) > 0)
+            return new OperationResult { IsSuccesfull = true, Message = "Member has beend added" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+    }
+
+
     public async Task<OperationResult> RemoveMemberFromBoard(int boardId, int memberId)
     {
         var boardToUpdate = await GetBoardById(boardId);
@@ -91,6 +97,35 @@ public class BoardService : IBoardService
 
         if (await UpdateBoard(boardToUpdate) > 0)
             return new OperationResult { IsSuccesfull = true, Message = "Member has been removed from board" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+    }
+
+
+    public async Task<OperationResult> AssignMemberToTask(int taskId, int memberId)
+    {
+        var taskToAssign = await GetToDoById(taskId);
+
+        if (taskToAssign == null)
+            return new OperationResult { IsSuccesfull = false, Message = $"There is no task with id '{taskId}'", IsNotFound = true };
+
+        var memberToAssign = await _repository.Members.Include(m => m.Boards).FirstOrDefaultAsync(x => x.Id == memberId);
+
+        if (memberToAssign == null)
+            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'", IsNotFound = true };
+
+        var isMemberAssignedToBoard = memberToAssign.Boards.Any(x => x.Id == taskToAssign.BoardId);
+
+        if (!isMemberAssignedToBoard)
+            return new OperationResult { IsSuccesfull = false, Message = $"User '{memberToAssign.MemberName}' is not member of board with task '{taskToAssign.Name}'" };
+
+        taskToAssign.AssignedMember = memberToAssign;
+
+        _repository.ToDos.Update(taskToAssign);
+        var affectedEntries = await _repository.SaveChangesAsync();
+
+        if (affectedEntries > 0)
+            return new OperationResult { IsSuccesfull = true, Message = $"Member '{memberToAssign.MemberName}' has been assgined to task '{taskToAssign.Name}'" };
 
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
@@ -130,16 +165,6 @@ public class BoardService : IBoardService
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
-    private async Task<OperationResult> AddItemToBoard(Board board, ToDo taskObject)
-    {
-        board.ToDoItems.Add(taskObject);
-
-        if (await UpdateBoard(board) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
-
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
-    }
-
     public async Task<OperationResult> CreateItemInBoard(int boardId, string taskName)
     {
         var boardToUpdate = await GetBoardById(boardId);
@@ -159,14 +184,6 @@ public class BoardService : IBoardService
     }
 
     public async Task<Board> GetBoardById(int boardId) => await _repository.Boards.FindAsync(boardId);
-
-    /// <returns>Affected entries of update command</returns>
-    private async Task<int> UpdateBoard(Board boardToUpdate)
-    {
-        _repository.Boards.Update(boardToUpdate);
-
-        return await _repository.SaveChangesAsync();
-    }
 
     public async Task<int> AddToDo(string name)
     {
@@ -198,4 +215,21 @@ public class BoardService : IBoardService
         return todo == null ? null : todo;
     }
 
+    private async Task<OperationResult> AddItemToBoard(Board board, ToDo taskObject)
+    {
+        board.ToDoItems.Add(taskObject);
+
+        if (await UpdateBoard(board) > 0)
+            return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
+
+        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+    }
+
+    /// <returns>Affected entries of update command</returns>
+    private async Task<int> UpdateBoard(Board boardToUpdate)
+    {
+        _repository.Boards.Update(boardToUpdate);
+
+        return await _repository.SaveChangesAsync();
+    }
 }

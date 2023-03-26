@@ -70,6 +70,14 @@ public interface IBoardService
     Task<OperationResult> RemoveMemberFromBoard(int boardId, int memberId);
 
     /// <summary>
+    /// Assigns member to task by Id
+    /// </summary>
+    /// <param name="taskId">ID of task</param>
+    /// <param name="memberId">ID of existing member</param>
+    /// <returns>Result of an operation</returns>
+    Task<OperationResult> AssignMemberToTask(int taskId,int memberId);
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="id">ID of item in database</param>
