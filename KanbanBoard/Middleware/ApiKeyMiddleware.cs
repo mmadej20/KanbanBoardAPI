@@ -9,7 +9,7 @@ public class ApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
 
-    private const string APIKEY = "XApiKey";
+    private const string _apiKey = "XApiKey";
 
     public ApiKeyMiddleware(RequestDelegate next)
     {
@@ -18,7 +18,7 @@ public class ApiKeyMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!context.Request.Headers.TryGetValue(APIKEY, out
+        if (!context.Request.Headers.TryGetValue(_apiKey, out
                 var providedApiKey))
         {
             context.Response.StatusCode = 401;
@@ -26,7 +26,7 @@ public class ApiKeyMiddleware
             return;
         }
         var appSettings = context.RequestServices.GetRequiredService<IConfiguration>();
-        var correctApiKey = appSettings.GetValue<string>(APIKEY);
+        var correctApiKey = appSettings.GetValue<string>(_apiKey);
         if (!correctApiKey.Equals(providedApiKey))
         {
             context.Response.StatusCode = 401;

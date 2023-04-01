@@ -15,6 +15,7 @@ public class MemberService : IMemberService
     {
         _kanbanContext = kanbanContext;
     }
+
     public async Task<OperationResult> AddMember(string memberName, string email)
     {
         var existing = await _kanbanContext.Members.FirstOrDefaultAsync(x => x.Email == email);
@@ -74,7 +75,5 @@ public class MemberService : IMemberService
             return new OperationResult { IsSuccesfull = true, Message = $"Member data has been updated!" };
 
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
-
-
     }
 }

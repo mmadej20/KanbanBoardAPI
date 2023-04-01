@@ -77,7 +77,6 @@ public class BoardService : IBoardService
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
-
     public async Task<OperationResult> RemoveMemberFromBoard(int boardId, int memberId)
     {
         var boardToUpdate = await GetBoardById(boardId);
@@ -100,7 +99,6 @@ public class BoardService : IBoardService
 
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
-
 
     public async Task<OperationResult> AssignMemberToTask(int taskId, int memberId)
     {
@@ -207,12 +205,12 @@ public class BoardService : IBoardService
         return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
     }
 
-    public async Task<IList<ToDo>> GetAllTasks() => _repository.ToDos.ToList();
+    public async Task<IList<ToDo>> GetAllTasks() => await _repository.ToDos.ToListAsync();
 
     public async Task<ToDo> GetToDoById(int id)
     {
-        var todo = _repository.ToDos.FirstOrDefault(x => x.Id == id);
-        return todo == null ? null : todo;
+        var todo = await _repository.ToDos.FirstOrDefaultAsync(x => x.Id == id);
+        return todo ?? null;
     }
 
     private async Task<OperationResult> AddItemToBoard(Board board, ToDo taskObject)

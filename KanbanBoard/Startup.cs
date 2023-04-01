@@ -37,7 +37,6 @@ public class Startup
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "KanbanBoard", Version = "v1", Description="Simple API to manage boards with tasks and members" });
             c.CustomSchemaIds(s => s.FullName.Replace("+", "."));
-
         });
 
         services.AddAutoMapper(typeof(Startup).Assembly);

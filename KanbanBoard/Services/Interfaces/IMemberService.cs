@@ -10,9 +10,7 @@ public interface IMemberService
 
     Task<OperationResult> AddMember(string memberName, string email);
 
-    Task<OperationResult> UpdateMember(int memberId,string memberName, string email);
+    Task<OperationResult> UpdateMember(int memberId, string memberName, string email);
 
     Task<OperationResult> DeleteMember(int memberId);
-
-
 }

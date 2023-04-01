@@ -11,14 +11,9 @@ namespace DataAccess
 {
     public class KanbanContext : DbContext
     {
-        public KanbanContext()
-        {
+        public KanbanContext() { }
 
-        }
-        public KanbanContext(DbContextOptions options) : base(options)
-        {
-
-        }
+        public KanbanContext(DbContextOptions options) : base(options) { }
 
         public virtual DbSet<ToDo> ToDos { get; set; }
 

@@ -14,7 +14,7 @@ namespace KanbanBoard.Tests.DatabaseFixture
 {
     public class KanbanDatabaseFixture
     {
-        private const string ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=KanbanTestDatabase;Trusted_Connection=True";
+        private const string _connectionString = @"Server=(localdb)\mssqllocaldb;Database=KanbanTestDatabase;Trusted_Connection=True";
 
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
@@ -50,9 +50,9 @@ namespace KanbanBoard.Tests.DatabaseFixture
         }
 
         public KanbanContext CreateContext()
-            => new KanbanContext(
+            => new(
                 new DbContextOptionsBuilder<KanbanContext>()
-                    .UseSqlServer(ConnectionString)
+                    .UseSqlServer(_connectionString)
                     .EnableThreadSafetyChecks()
                     .Options);
     }
@@ -65,7 +65,6 @@ namespace KanbanBoard.Tests.DatabaseFixture
 
             var mockRepo = new BoardService(context);
             return mockRepo;
-
         }
 
         public static MemberService GetMemberService()

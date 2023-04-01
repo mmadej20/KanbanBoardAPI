@@ -82,5 +82,4 @@ public class BoardController : ControllerBase
 
         return response.IsSuccesfull == false ? BadRequest(response) : Ok(response);
     }
-
 }

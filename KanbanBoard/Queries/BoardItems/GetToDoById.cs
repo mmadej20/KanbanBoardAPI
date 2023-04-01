@@ -16,12 +16,10 @@ public class GetToDoById
     public class Handler : IRequestHandler<Query, ToDo>
     {
         private readonly IBoardService _kanbanService;
-        private readonly IMapper _mapper;
 
-        public Handler(IBoardService kanbanService, IMapper mapper)
+        public Handler(IBoardService kanbanService)
         {
             _kanbanService = kanbanService;
-            _mapper = mapper;
         }
 
         public async Task<ToDo> Handle(Query request, CancellationToken cancellationToken)
