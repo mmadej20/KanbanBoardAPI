@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Tests
 {
-    [CollectionDefinition("Boards",DisableParallelization = true)]
+    [CollectionDefinition("Boards")]
     public class BoardsTest : IClassFixture<KanbanDatabaseFixture>
     {
         private readonly IBoardService _boardService;
 
         public BoardsTest()
         {
-            _boardService = ServicesWithFixtureDatabase.GetBoardItemService();
+            _boardService = ServicesWithFixtureDatabase.GetBoardService();
         }
 
         [Theory]

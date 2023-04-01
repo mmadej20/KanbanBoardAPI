@@ -7,7 +7,7 @@ using Moq;
 
 namespace KanbanBoard.Tests
 {
-    [CollectionDefinition("BoardItems", DisableParallelization = true)]
+    [CollectionDefinition("BoardItems")]
     public class BoardItemsTest : IClassFixture<KanbanDatabaseFixture>
     {
         //private readonly BoardItemService _mockService;
@@ -17,7 +17,7 @@ namespace KanbanBoard.Tests
         public BoardItemsTest()
         {
             //_mockService = Mocks.MockRepositories.GetToDoService();
-            _boardService = ServicesWithFixtureDatabase.GetBoardItemService();
+            _boardService = ServicesWithFixtureDatabase.GetBoardService();
         }
 
         [Fact]
