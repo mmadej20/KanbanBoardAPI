@@ -1,28 +1,26 @@
-﻿using DataAccess.Models;
-using KanbanBoard.Services;
+﻿using KanbanBoard.Services;
 using KanbanBoard.Tests.DatabaseFixture;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit.Abstractions;
+using Shouldly;
+using TUnit.Core.Logging;
 
 namespace KanbanBoard.Tests
 {
-    public class MembersTest : IClassFixture<KanbanDatabaseFixture>
+    [ClassDataSource(typeof(KanbanDatabaseFixture))]
+    public class MembersTest
     {
-        private readonly MemberService _memberService;
-        private readonly ITestOutputHelper _output;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        private MemberService _memberService;
+        private DefaultLogger _output;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        public MembersTest(ITestOutputHelper output)
+        [Before(HookType.Test)]
+        public void Initialize()
         {
             _memberService = ServicesWithFixtureDatabase.GetMemberService();
-            _output = output;
+            _output = TestContext.Current!.GetDefaultLogger();
         }
 
-        [Fact]
+        [Test]
         public async Task MemberShouldBeAddedToDatabase()
         {
             var memberName = "New Member";
@@ -30,10 +28,10 @@ namespace KanbanBoard.Tests
 
             var result = await _memberService.AddMember(memberName, email);
 
-            Assert.True(result.IsSuccesfull);
+            result.IsSuccesfull.ShouldBe(true);
         }
 
-        [Fact]
+        [Test]
         public async Task ShouldReturnEmailAlreadyInUse()
         {
             var memberName = "user2";
@@ -41,29 +39,28 @@ namespace KanbanBoard.Tests
 
             var result = await _memberService.AddMember(memberName, email);
 
-            Assert.Contains($"Email '{email}' is already in use!", result.Message);
+            result.Message.ShouldContain($"Email '{email}' is already in use!");
         }
 
-        [Theory]
-        [InlineData("User1Updated")]
+        [Test]
+        [Arguments("User1Updated")]
         public async Task MemberShouldBeUpdatedWithNewName(string newName)
         {
             await _memberService.UpdateMember(1, newName);
 
             var updatedMember = await _memberService.GetMemberById(1);
 
-            _output.WriteLine($"Updated member name: {updatedMember.MemberName}");
-            Assert.Equal(updatedMember.MemberName, newName);
+            _output.LogInformation($"Updated member name: {updatedMember.MemberName}");
+            updatedMember.MemberName.ShouldBe(newName);
         }
 
-        [Fact]
+        [Test]
         public async Task MemberShouldBeRemoved()
         {
             await _memberService.DeleteMember(2);
 
             var deletedMember = await _memberService.GetMemberById(2);
-
-            Assert.Null(deletedMember);
+            deletedMember.ShouldBeNull();
         }
     }
 }

@@ -1,48 +1,52 @@
 using DataAccess.Enums;
 using DataAccess.Models;
 using KanbanBoard.Services;
-using KanbanBoard.Services.Interfaces;
 using KanbanBoard.Tests.DatabaseFixture;
-using Moq;
+using Shouldly;
 
 namespace KanbanBoard.Tests
 {
-    [CollectionDefinition("BoardItems")]
-    public class BoardItemsTest : IClassFixture<KanbanDatabaseFixture>
+    [ClassDataSource(typeof(KanbanDatabaseFixture))]
+    public class BoardItemsTest
     {
-        //private readonly BoardItemService _mockService;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+        private BoardService _boardService;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        private readonly BoardService _boardService;
-
-        public BoardItemsTest()
+        [Before(HookType.Test)]
+        public void Initialize()
         {
-            //_mockService = Mocks.MockRepositories.GetToDoService();
             _boardService = ServicesWithFixtureDatabase.GetBoardService();
         }
 
-        [Fact]
+        [Test]
+        [NotInParallel]
         public async Task TaskShouldBeAddedToRepository()
         {
             var result = await _boardService.AddToDo("TestTask");
 
-            Assert.NotEqual(-1, result);
+            result.ShouldNotBe(-1);
         }
 
-        [Fact]
+        [Test]
+        [NotInParallel]
         public async Task GetAllTasksShouldReturnListOfToDo()
         {
-            Assert.IsType<List<ToDo>>(await _boardService.GetAllTasks());
+            var tasks = await _boardService.GetAllTasks();
+            tasks.ShouldBeOfType<List<ToDo?>>();
         }
 
-        [Fact]
+        [Test]
+        [NotInParallel]
         public async Task StatusShouldBeChangeToInProgress()
         {
-            var inProgressTask = await _boardService.ChangeStatus(1, StatusType.InProgress).ContinueWith<Task<ToDo>>((item) =>
-            {
-                return _boardService.GetToDoById(1);
-            });
+            var result = await _boardService.ChangeStatus(1, StatusType.InProgress);
+            
+            result.IsSuccesfull.ShouldBe(true);
 
-            Assert.StartsWith("InProgress", inProgressTask.Result.Status.ToString());
+            var inProgressTask = await _boardService.GetToDoById(1);
+
+            inProgressTask.Status.ToString().ShouldBe(StatusType.InProgress.ToString());    
         }
     }
 }

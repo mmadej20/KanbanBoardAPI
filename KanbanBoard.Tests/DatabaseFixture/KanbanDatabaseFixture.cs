@@ -3,12 +3,6 @@ using DataAccess.Enums;
 using DataAccess.Models;
 using KanbanBoard.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace KanbanBoard.Tests.DatabaseFixture
 {
@@ -39,7 +33,7 @@ namespace KanbanBoard.Tests.DatabaseFixture
                             );
                         context.Members.AddRange(
                             new Member { MemberName = "User1", Email = "user1@liamg.com" },
-                            new Member { MemberName = "DeleteMe", Email = "deleted@liamg.com"}
+                            new Member { MemberName = "DeleteMe", Email = "deleted@liamg.com" }
                             );
                         context.SaveChanges();
                     }
@@ -50,11 +44,10 @@ namespace KanbanBoard.Tests.DatabaseFixture
         }
 
         public KanbanContext CreateContext()
-            => new(
-                new DbContextOptionsBuilder<KanbanContext>()
-                    .UseSqlServer(_connectionString)
-                    .EnableThreadSafetyChecks()
-                    .Options);
+            => new(new DbContextOptionsBuilder<KanbanContext>()
+                       .UseSqlServer(_connectionString)
+                       .EnableThreadSafetyChecks()
+                       .Options);
     }
 
     public static class ServicesWithFixtureDatabase
