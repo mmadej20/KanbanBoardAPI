@@ -1,79 +1,104 @@
-﻿using DataAccess;
+﻿using CSharpFunctionalExtensions;
+using DataAccess;
 using DataAccess.Models;
-using KanbanBoard.Domain;
+using KanbanBoard.Domain.Errors;
+using KanbanBoard.Models;
 using KanbanBoard.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace KanbanBoard.Services;
 
-public class MemberService : IMemberService
+public class MemberService(KanbanContext kanbanContext) : IMemberService
 {
-    private readonly KanbanContext _kanbanContext;
+    private readonly KanbanContext _kanbanContext = kanbanContext;
 
-    public MemberService(KanbanContext kanbanContext)
-    {
-        _kanbanContext = kanbanContext;
-    }
-
-    public async Task<OperationResult> AddMember(string memberName, string email)
+    public async Task<UnitResult<Error>> AddMember(string memberName, string email)
     {
         var existing = await _kanbanContext.Members.FirstOrDefaultAsync(x => x.Email == email);
 
         if (existing is not null)
-            return new OperationResult { IsSuccesfull = false, Message = $"Email '{email}' is already in use!" };
+        {
+            return MemberServiceErrors.EmailAlreadyInUse(email);
+        }
 
         var newMember = await _kanbanContext.Members.AddAsync(new Member { MemberName = memberName, Email = email });
 
         var affectedEntries = await _kanbanContext.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"New member has been created with ID:{newMember.Entity.Id}" };
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return MemberServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> DeleteMember(int memberId)
+    public async Task<UnitResult<Error>> DeleteMember(int memberId)
     {
         var memberToDelete = await _kanbanContext.Members.FindAsync(memberId);
 
         if (memberToDelete is null)
-            return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists", IsNotFound = true };
+        {
+            return MemberServiceErrors.MemberNotFound(memberId);
+        }
 
         _kanbanContext.Remove(memberToDelete);
         var affectedEntries = await _kanbanContext.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"Member '{memberToDelete.MemberName}' has been removed!" };
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return MemberServiceErrors.GenericError;
     }
 
-    public async Task<Member> GetMemberById(int memberId) => await _kanbanContext.Members.FirstOrDefaultAsync(i => i.Id == memberId);
+    public async Task<Result<Member, Error>> GetMemberById(int memberId)
+    {
+        var member = await _kanbanContext.Members.FirstOrDefaultAsync(i => i.Id == memberId);
 
-    public async Task<OperationResult> UpdateMember(int memberId, string memberName = null, string email = null)
+        if (member is null)
+        {
+            return MemberServiceErrors.MemberNotFound(memberId);
+        }
+
+        return member;
+    }
+
+    public async Task<UnitResult<Error>> UpdateMember(int memberId, string memberName = null, string email = null)
     {
         if (string.IsNullOrEmpty(memberName) && string.IsNullOrEmpty(email))
-            return new OperationResult { IsSuccesfull = false, Message = $"There is nothing to update" };
+        {
+            return MemberServiceErrors.NothingToUpdate;
+        }
 
         var memberToUpdate = await _kanbanContext.Members.FindAsync(memberId);
 
         if (memberToUpdate is null)
-            return new OperationResult { IsSuccesfull = false, Message = $"Member with ID '{memberId}' does not exists", IsNotFound = true };
+        {
+            return MemberServiceErrors.MemberNotFound(memberId);
+        }
 
         if (!string.IsNullOrWhiteSpace(memberName))
+        {
             memberToUpdate.MemberName = memberName;
+        }
 
         if (!string.IsNullOrEmpty(email))
+        {
             memberToUpdate.Email = email;
+        }
 
         _kanbanContext.Members.Update(memberToUpdate);
 
         var affectedEntries = await _kanbanContext.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"Member data has been updated!" };
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return MemberServiceErrors.GenericError;
     }
 }
