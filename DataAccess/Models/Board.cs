@@ -9,10 +9,10 @@ namespace DataAccess.Models
 
         [Required]
         [MaxLength(200)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
-        public List<ToDo> ToDoItems { get; set; }
+        public List<ToDo>? ToDoItems { get; set; }
 
-        public List<Member> Members { get; set; }
+        public List<Member>? Members { get; set; }
     }
 }
