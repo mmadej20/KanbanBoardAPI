@@ -1,12 +1,10 @@
-﻿using AutoMapper.Execution;
+﻿using CSharpFunctionalExtensions;
 using DataAccess;
 using DataAccess.Enums;
 using DataAccess.Models;
-using KanbanBoard.Commands.BoardItems;
-using KanbanBoard.Domain;
-using KanbanBoard.Queries.BoardItems;
+using KanbanBoard.Domain.Errors;
+using KanbanBoard.Models;
 using KanbanBoard.Services.Interfaces;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,220 +12,302 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Services;
 
-public class BoardService : IBoardService
+public class BoardService(KanbanContext kanbanContext) : IBoardService
 {
-    private readonly KanbanContext _repository;
+    private readonly KanbanContext _repository = kanbanContext;
 
-    public BoardService(KanbanContext kanbanContext)
-    {
-        _repository = kanbanContext;
-    }
-    public async Task<OperationResult> CreateBoard(string name)
+    public async Task<UnitResult<Error>> CreateBoard(string name)
     {
         await _repository.Boards.AddAsync(new Board { Name = name });
 
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"Board '{name}' has been created" };
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.BoardCreateFailure;
     }
 
-    public async Task<OperationResult> DeleteBoard(int boardId)
+    public async Task<UnitResult<Error>> DeleteBoard(int boardId)
     {
         var boardToRemove = await GetBoardById(boardId);
 
-        if (boardToRemove == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+        if (boardToRemove.IsFailure)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
 
-        _repository.Boards.Remove(boardToRemove);
+        _repository.Boards.Remove(boardToRemove.Value);
 
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"Board '{boardToRemove.Name}' has been removed" };
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> AddMemberToBoard(int boardId, int memberId)
+    public async Task<UnitResult<Error>> AddMemberToBoard(int boardId, int memberId)
     {
         var boardToUpdate = await GetBoardById(boardId);
 
-        if (boardToUpdate == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+        if (boardToUpdate.IsFailure)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
 
         var memberToAdd = await _repository.Members.FindAsync(memberId);
 
         if (memberToAdd == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'" };
+        {
+            return BoardServiceErrors.MemberNotFound(memberId);
+        }
 
-        if (boardToUpdate.Members.Any(x => x.MemberName == memberToAdd.MemberName))
-            return new OperationResult { IsSuccesfull = false, Message = $"Member {memberToAdd.MemberName} is already assigned to this board" };
+        if (boardToUpdate.Value.Members.Any(x => x.MemberName == memberToAdd.MemberName))
+        {
+            return BoardServiceErrors.MemberAlreadyExists(memberId);
+        }
 
-        if (boardToUpdate.Members == null)
-            boardToUpdate.Members = new List<DataAccess.Models.Member> { memberToAdd };
+        if (boardToUpdate.Value.Members == null)
+        {
+            boardToUpdate.Value.Members = [memberToAdd];
+        }
         else
-            boardToUpdate.Members.Add(memberToAdd);
+        {
+            boardToUpdate.Value.Members.Add(memberToAdd);
+        }
 
-        if (await UpdateBoard(boardToUpdate) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Member has beend added" };
+        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> RemoveMemberFromBoard(int boardId, int memberId)
+    public async Task<UnitResult<Error>> RemoveMemberFromBoard(int boardId, int memberId)
     {
         var boardToUpdate = await GetBoardById(boardId);
 
-        if (boardToUpdate == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+        if (boardToUpdate.IsFailure)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
 
         var memberToRemove = await _repository.Members.FindAsync(memberId);
 
         if (memberToRemove == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'" };
+        {
+            return BoardServiceErrors.MemberNotFound(memberId);
+        }
 
-        var removeResult = boardToUpdate.Members.Remove(memberToRemove);
+        var removeResult = boardToUpdate.Value.Members.Remove(memberToRemove);
 
         if (!removeResult)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}' related to this board!" };
+        {
+            return BoardServiceErrors.GenericError;
+        }
 
-        if (await UpdateBoard(boardToUpdate) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Member has been removed from board" };
+        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> AssignMemberToTask(int taskId, int memberId)
+    public async Task<UnitResult<Error>> AssignMemberToTask(int taskId, int memberId)
     {
         var taskToAssign = await GetToDoById(taskId);
 
-        if (taskToAssign == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no task with id '{taskId}'", IsNotFound = true };
+        if (taskToAssign.IsFailure)
+        {
+            return taskToAssign.Error;
+        }
 
         var memberToAssign = await _repository.Members.Include(m => m.Boards).FirstOrDefaultAsync(x => x.Id == memberId);
 
         if (memberToAssign == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no member with id '{memberId}'", IsNotFound = true };
+        {
+            return BoardServiceErrors.MemberNotFound(memberId);
+        }
 
-        var isMemberAssignedToBoard = memberToAssign.Boards.Any(x => x.Id == taskToAssign.BoardId);
+        var isMemberAssignedToBoard = memberToAssign.Boards.Any(x => x.Id == taskToAssign.Value.BoardId);
 
         if (!isMemberAssignedToBoard)
-            return new OperationResult { IsSuccesfull = false, Message = $"User '{memberToAssign.MemberName}' is not member of board with task '{taskToAssign.Name}'" };
+        {
+            return BoardServiceErrors.MemberIsNotAssignedToBoard(memberId);
+        }
 
-        taskToAssign.AssignedMember = memberToAssign;
+        taskToAssign.Value.AssignedMember = memberToAssign;
 
-        _repository.ToDos.Update(taskToAssign);
+        _repository.ToDos.Update(taskToAssign.Value);
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = $"Member '{memberToAssign.MemberName}' has been assgined to task '{taskToAssign.Name}'" };
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> UpdateBoardName(int boardId, string newName)
+    public async Task<UnitResult<Error>> UpdateBoardName(int boardId, string newName)
     {
         var boardToUpdate = await GetBoardById(boardId);
 
-        if (boardToUpdate == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+        if (boardToUpdate.IsFailure)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
 
-        boardToUpdate.Name = newName;
+        boardToUpdate.Value.Name = newName;
 
-        if (await UpdateBoard(boardToUpdate) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Member has been removed from board" };
+        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> AddItemToBoard(int boardId, int itemId)
+    public async Task<UnitResult<Error>> AddItemToBoard(int boardId, int itemId)
     {
         var boardToUpdate = await GetBoardById(boardId);
 
-        if (boardToUpdate == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+        if (boardToUpdate.IsFailure)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
 
         var itemToAdd = await _repository.ToDos.FindAsync(itemId);
 
         if (itemToAdd == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no item with id '{itemId}'" };
+        {
+            return BoardServiceErrors.ItemNotFound(itemId);
+        }
 
-        boardToUpdate.ToDoItems.Add(itemToAdd);
+        boardToUpdate.Value.ToDoItems.Add(itemToAdd);
 
-        if (await UpdateBoard(boardToUpdate) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
+        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> CreateItemInBoard(int boardId, string taskName)
+    public async Task<UnitResult<Error>> CreateItemInBoard(int boardId, string taskName)
     {
         var boardToUpdate = await GetBoardById(boardId);
 
-        if (boardToUpdate == null)
-            return new OperationResult { IsSuccesfull = false, Message = $"There is no board with id '{boardId}'" };
+        if (boardToUpdate.IsFailure)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
 
         var newTaskId = await AddToDo(taskName);
         var newTaskObject = await _repository.ToDos.FindAsync(newTaskId);
 
-        if (newTaskId == -1)
-            return new OperationResult { IsSuccesfull = false, Message = "Failed to create task" };
+        if (newTaskId.IsFailure)
+        {
+            return newTaskId.Error;
+        }
 
-        var result = await AddItemToBoard(boardToUpdate, newTaskObject);
+        var result = await AddItemToBoard(boardToUpdate.Value, newTaskObject);
 
         return result;
     }
 
-    public async Task<Board> GetBoardById(int boardId) => await _repository.Boards.FindAsync(boardId);
+    public async Task<Result<Board, Error>> GetBoardById(int boardId)
+    {
+        var board = await _repository.Boards.FindAsync(boardId);
 
-    public async Task<int> AddToDo(string name)
+        if (board == null)
+        {
+            return BoardServiceErrors.BoardNotFound(boardId);
+        }
+
+        return board;
+    }
+
+    public async Task<Result<int, Error>> AddToDo(string name)
     {
         var addedTask = await _repository.ToDos.AddAsync(new ToDo { Status = StatusType.ToDo, Name = name });
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
+        {
             return addedTask.Entity.Id;
+        }
 
-        return -1;
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<OperationResult> ChangeStatus(int id, StatusType status)
+    public async Task<Result<int, Error>> ChangeStatus(int id, StatusType status)
     {
         _repository.ToDos.FirstOrDefault(i => i.Id == id).Status = status;
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Task status has been changed" };
+        {
+            return affectedEntries;
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    public async Task<IList<ToDo>> GetAllTasks() => await _repository.ToDos.ToListAsync();
+    public async Task<Result<IList<ToDo>, Error>> GetAllTasks()
+    {
+        var toDosList = await _repository.ToDos.ToListAsync();
 
-    public async Task<ToDo> GetToDoById(int id)
+        if (toDosList == null || !toDosList.Any())
+        {
+            return BoardServiceErrors.NoTasksFound;
+        }
+
+        return toDosList;
+    }
+
+    public async Task<Result<ToDo, Error>> GetToDoById(int id)
     {
         var todo = await _repository.ToDos.FirstOrDefaultAsync(x => x.Id == id);
-        return todo ?? null;
+        if (todo == null)
+        {
+            return BoardServiceErrors.ItemNotFound(id);
+        }
+
+        return todo;
     }
 
-    private async Task<OperationResult> AddItemToBoard(Board board, ToDo taskObject)
+    private async Task<UnitResult<Error>> AddItemToBoard(Board board, ToDo taskObject)
     {
         board.ToDoItems.Add(taskObject);
 
-        if (await UpdateBoard(board) > 0)
-            return new OperationResult { IsSuccesfull = true, Message = "Item has been added to board" };
+        if ((await UpdateBoard(board)).IsSuccess)
+        {
+            return UnitResult.Success<Error>();
+        }
 
-        return new OperationResult { IsSuccesfull = false, Message = "There is a problem with your request" };
+        return BoardServiceErrors.GenericError;
     }
 
-    /// <returns>Affected entries of update command</returns>
-    private async Task<int> UpdateBoard(Board boardToUpdate)
+    /// <returns>Result of operation and affected entries of update command. Error message if operation fails.</returns>
+    private async Task<Result<int, Error>> UpdateBoard(Board boardToUpdate)
     {
         _repository.Boards.Update(boardToUpdate);
 
-        return await _repository.SaveChangesAsync();
+        var affectedEntries = await _repository.SaveChangesAsync();
+
+        if (affectedEntries > 0)
+        {
+            return affectedEntries;
+        }
+
+        return BoardServiceErrors.GenericError;
     }
 }
