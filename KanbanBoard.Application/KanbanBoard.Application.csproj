@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataAccess\KanbanBoard.DataAccess.csproj" />
+    <ProjectReference Include="..\KanbanBoard.DataAccess\KanbanBoard.DataAccess.csproj" />
     <ProjectReference Include="..\KanbanBoard.Domain\KanbanBoard.Domain.csproj" />
   </ItemGroup>
 

@@ -12,9 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.Tests", "KanbanBoard.Tests\KanbanBoard.Tests.csproj", "{2CF7CEFE-07AB-49DB-B8DD-1D69ECEBFEAF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.Api", "KanbanBoard\KanbanBoard.Api.csproj", "{23115592-C920-4694-8C2F-731F4ED9485E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.Api", "KanbanBoard.Api\KanbanBoard.Api.csproj", "{23115592-C920-4694-8C2F-731F4ED9485E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.DataAccess", "DataAccess\KanbanBoard.DataAccess.csproj", "{67B3E238-B308-488E-93DE-8366E1BCEE5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.DataAccess", "KanbanBoard.DataAccess\KanbanBoard.DataAccess.csproj", "{67B3E238-B308-488E-93DE-8366E1BCEE5C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KanbanBoard.Application", "KanbanBoard.Application\KanbanBoard.Application.csproj", "{4B21220C-29C8-4428-9D51-E135CB750024}"
 EndProject

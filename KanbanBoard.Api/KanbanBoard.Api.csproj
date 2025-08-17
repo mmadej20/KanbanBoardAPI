@@ -31,8 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataAccess\KanbanBoard.DataAccess.csproj" />
     <ProjectReference Include="..\KanbanBoard.Application\KanbanBoard.Application.csproj" />
+    <ProjectReference Include="..\KanbanBoard.DataAccess\KanbanBoard.DataAccess.csproj" />
     <ProjectReference Include="..\KanbanBoard.Infrastructure\KanbanBoard.Infrastructure.csproj" />
   </ItemGroup>
 
