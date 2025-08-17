@@ -1,6 +1,6 @@
-﻿using KanbanBoard.Models;
+﻿using KanbanBoard.Application.Models;
 
-namespace KanbanBoard.Domain.Errors
+namespace KanbanBoard.Application.Members.Errors
 {
     public static class MemberServiceErrors
     {

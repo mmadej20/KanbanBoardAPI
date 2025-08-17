@@ -1,24 +1,32 @@
-﻿using CSharpFunctionalExtensions;
-using DataAccess;
-using DataAccess.Enums;
-using DataAccess.Models;
-using KanbanBoard.Domain.Errors;
-using KanbanBoard.Models;
-using KanbanBoard.Services.Interfaces;
+﻿using AutoMapper;
+using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Boards.Errors;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
+using KanbanBoard.DataAccess;
+using KanbanBoard.DataAccess.Entities;
+using KanbanBoard.Domain.Entities;
+using KanbanBoard.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace KanbanBoard.Services;
+namespace KanbanBoard.Infrastructure.Services;
 
-public class BoardService(KanbanContext kanbanContext) : IBoardService
+//TODO: Check if .Update is needed in various places, as it might not be necessary if the entity is already being tracked by the context.
+
+/// <summary>
+/// Implementation of <see cref="IBoardService"/> for managing Kanban boards.
+/// </summary>
+/// <param name="kanbanContext"></param>
+/// <param name="mapper"></param>
+public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardService
 {
     private readonly KanbanContext _repository = kanbanContext;
+    private readonly IMapper _mapper = mapper;
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> CreateBoard(string name)
     {
-        await _repository.Boards.AddAsync(new Board { Name = name });
+        await _repository.Boards.AddAsync(new BoardEntity { Name = name });
 
         var affectedEntries = await _repository.SaveChangesAsync();
 
@@ -30,16 +38,17 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.BoardCreateFailure;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> DeleteBoard(int boardId)
     {
-        var boardToRemove = await GetBoardById(boardId);
+        var boardToRemove = await _repository.Boards.FindAsync(boardId);
 
-        if (boardToRemove.IsFailure)
+        if (boardToRemove == null)
         {
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
-        _repository.Boards.Remove(boardToRemove.Value);
+        _repository.Boards.Remove(boardToRemove);
 
         var affectedEntries = await _repository.SaveChangesAsync();
 
@@ -51,37 +60,31 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> AddMemberToBoard(int boardId, int memberId)
     {
-        var boardToUpdate = await GetBoardById(boardId);
+        var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
-        if (boardToUpdate.IsFailure)
+        if (boardToUpdate == null)
         {
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
-        var memberToAdd = await _repository.Members.FindAsync(memberId);
+        var memberEntityToAdd = await _repository.Members.FindAsync(memberId);
 
-        if (memberToAdd == null)
+        if (memberEntityToAdd == null)
         {
             return BoardServiceErrors.MemberNotFound(memberId);
         }
 
-        if (boardToUpdate.Value.Members.Any(x => x.MemberName == memberToAdd.MemberName))
+        if (boardToUpdate.BoardMembers.Any(bm => bm.Member.MemberName == memberEntityToAdd.MemberName))
         {
             return BoardServiceErrors.MemberAlreadyExists(memberId);
         }
 
-        if (boardToUpdate.Value.Members == null)
-        {
-            boardToUpdate.Value.Members = [memberToAdd];
-        }
-        else
-        {
-            boardToUpdate.Value.Members.Add(memberToAdd);
-        }
+        boardToUpdate.AddMember(memberEntityToAdd);
 
-        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        if ((await UpdateBoard(boardToUpdate)).IsSuccess)
         {
             return UnitResult.Success<Error>();
         }
@@ -89,30 +92,25 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> RemoveMemberFromBoard(int boardId, int memberId)
     {
-        var boardToUpdate = await GetBoardById(boardId);
+        var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
-        if (boardToUpdate.IsFailure)
+        if (boardToUpdate == null)
         {
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
-        var memberToRemove = await _repository.Members.FindAsync(memberId);
+        var boardMemberToRemove = boardToUpdate.BoardMembers
+            .FirstOrDefault(bm => bm.MemberId == memberId);
 
-        if (memberToRemove == null)
+        if (boardMemberToRemove != null)
         {
-            return BoardServiceErrors.MemberNotFound(memberId);
+            boardToUpdate.BoardMembers.Remove(boardMemberToRemove);
         }
 
-        var removeResult = boardToUpdate.Value.Members.Remove(memberToRemove);
-
-        if (!removeResult)
-        {
-            return BoardServiceErrors.GenericError;
-        }
-
-        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        if ((await UpdateBoard(boardToUpdate)).IsSuccess)
         {
             return UnitResult.Success<Error>();
         }
@@ -120,32 +118,35 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> AssignMemberToTask(int taskId, int memberId)
     {
-        var taskToAssign = await GetToDoById(taskId);
+        var taskToAssign = await _repository.ToDos.FindAsync(taskId);
 
-        if (taskToAssign.IsFailure)
+        if (taskToAssign == null)
         {
-            return taskToAssign.Error;
+            return BoardServiceErrors.ItemNotFound(taskId);
         }
 
-        var memberToAssign = await _repository.Members.Include(m => m.Boards).FirstOrDefaultAsync(x => x.Id == memberId);
+        var memberToAssign = await _repository.Members
+            .FirstOrDefaultAsync(x => x.Id == memberId);
 
         if (memberToAssign == null)
         {
             return BoardServiceErrors.MemberNotFound(memberId);
         }
 
-        var isMemberAssignedToBoard = memberToAssign.Boards.Any(x => x.Id == taskToAssign.Value.BoardId);
+        var isMemberAssignedToBoard = memberToAssign.BoardMembers!
+            .Any(bm => bm.BoardId == taskToAssign.BoardId);
 
         if (!isMemberAssignedToBoard)
         {
             return BoardServiceErrors.MemberIsNotAssignedToBoard(memberId);
         }
 
-        taskToAssign.Value.AssignedMember = memberToAssign;
+        taskToAssign.AssignedMember = memberToAssign;
 
-        _repository.ToDos.Update(taskToAssign.Value);
+        _repository.ToDos.Update(taskToAssign);
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
@@ -156,18 +157,19 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> UpdateBoardName(int boardId, string newName)
     {
-        var boardToUpdate = await GetBoardById(boardId);
+        var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
-        if (boardToUpdate.IsFailure)
+        if (boardToUpdate == null)
         {
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
-        boardToUpdate.Value.Name = newName;
+        boardToUpdate.Name = newName;
 
-        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        if ((await UpdateBoard(boardToUpdate)).IsSuccess)
         {
             return UnitResult.Success<Error>();
         }
@@ -175,25 +177,26 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> AddItemToBoard(int boardId, int itemId)
     {
-        var boardToUpdate = await GetBoardById(boardId);
+        var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
-        if (boardToUpdate.IsFailure)
+        if (boardToUpdate == null)
         {
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
-        var itemToAdd = await _repository.ToDos.FindAsync(itemId);
+        var itemEntityToAdd = await _repository.ToDos.FindAsync(itemId);
 
-        if (itemToAdd == null)
+        if (itemEntityToAdd == null)
         {
             return BoardServiceErrors.ItemNotFound(itemId);
         }
 
-        boardToUpdate.Value.ToDoItems.Add(itemToAdd);
+        boardToUpdate.ToDoItems!.Add(itemEntityToAdd);
 
-        if ((await UpdateBoard(boardToUpdate.Value)).IsSuccess)
+        if ((await UpdateBoard(boardToUpdate)).IsSuccess)
         {
             return UnitResult.Success<Error>();
         }
@@ -201,6 +204,7 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<UnitResult<Error>> CreateItemInBoard(int boardId, string taskName)
     {
         var boardToUpdate = await GetBoardById(boardId);
@@ -211,33 +215,38 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         }
 
         var newTaskId = await AddToDo(taskName);
-        var newTaskObject = await _repository.ToDos.FindAsync(newTaskId);
 
         if (newTaskId.IsFailure)
         {
             return newTaskId.Error;
         }
 
-        var result = await AddItemToBoard(boardToUpdate.Value, newTaskObject);
+        var newTaskObject = await _repository.ToDos.FindAsync(newTaskId.Value);
+
+        var result = await AddItemToBoard(boardToUpdate.Value.Id, newTaskObject!.Id);
 
         return result;
     }
 
+    /// <inheritdoc/>
     public async Task<Result<Board, Error>> GetBoardById(int boardId)
     {
-        var board = await _repository.Boards.FindAsync(boardId);
+        var boardEntity = await _repository.Boards
+            .FirstOrDefaultAsync(b => b.Id == boardId);
 
-        if (board == null)
+        if (boardEntity == null)
         {
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
+        var board = _mapper.Map<Board>(boardEntity);
         return board;
     }
 
+    /// <inheritdoc/>
     public async Task<Result<int, Error>> AddToDo(string name)
     {
-        var addedTask = await _repository.ToDos.AddAsync(new ToDo { Status = StatusType.ToDo, Name = name });
+        var addedTask = await _repository.ToDos.AddAsync(new ToDoEntity { Status = StatusType.ToDo, Name = name });
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
@@ -248,9 +257,17 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<Result<int, Error>> ChangeStatus(int id, StatusType status)
     {
-        _repository.ToDos.FirstOrDefault(i => i.Id == id).Status = status;
+        var taskEntity = await _repository.ToDos.FirstOrDefaultAsync(i => i.Id == id);
+
+        if (taskEntity == null)
+        {
+            return BoardServiceErrors.ItemNotFound(id);
+        }
+
+        taskEntity.Status = status;
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
@@ -261,45 +278,40 @@ public class BoardService(KanbanContext kanbanContext) : IBoardService
         return BoardServiceErrors.GenericError;
     }
 
+    /// <inheritdoc/>
     public async Task<Result<IList<ToDo>, Error>> GetAllTasks()
     {
-        var toDosList = await _repository.ToDos.ToListAsync();
+        var toDosListEntity = await _repository.ToDos.ToListAsync();
 
-        if (toDosList == null || !toDosList.Any())
+        if (toDosListEntity == null || !toDosListEntity.Any())
         {
             return BoardServiceErrors.NoTasksFound;
         }
 
+        var toDosList = _mapper.Map<List<ToDo>>(toDosListEntity);
+
         return toDosList;
     }
 
+    /// <inheritdoc/>
     public async Task<Result<ToDo, Error>> GetToDoById(int id)
     {
-        var todo = await _repository.ToDos.FirstOrDefaultAsync(x => x.Id == id);
-        if (todo == null)
+        var todoEntity = await _repository.ToDos.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (todoEntity == null)
         {
             return BoardServiceErrors.ItemNotFound(id);
         }
 
+        var todo = _mapper.Map<ToDo>(todoEntity);
+
         return todo;
     }
 
-    private async Task<UnitResult<Error>> AddItemToBoard(Board board, ToDo taskObject)
-    {
-        board.ToDoItems.Add(taskObject);
-
-        if ((await UpdateBoard(board)).IsSuccess)
-        {
-            return UnitResult.Success<Error>();
-        }
-
-        return BoardServiceErrors.GenericError;
-    }
-
     /// <returns>Result of operation and affected entries of update command. Error message if operation fails.</returns>
-    private async Task<Result<int, Error>> UpdateBoard(Board boardToUpdate)
+    private async Task<Result<int, Error>> UpdateBoard(BoardEntity boardToUpdate)
     {
-        _repository.Boards.Update(boardToUpdate);
+        _repository.Boards.Update(boardToUpdate); //TODO: CHECK IF ITS NEEDED LATER
 
         var affectedEntries = await _repository.SaveChangesAsync();
 

@@ -1,19 +1,20 @@
-﻿using KanbanBoard.Domain;
-using KanbanBoard.Services.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Commands.BoardItems;
+namespace KanbanBoard.Api.Commands.BoardItems;
 
 public class AddToDo
 {
     //Command
-    public record Command(string Name) : IRequest<int>;
+    public record Command(string Name) : IRequest<Result<int, Error>>;
 
     //Handler
 
-    public class Handler : IRequestHandler<Command, int>
+    public class Handler : IRequestHandler<Command, Result<int, Error>>
     {
         private readonly IBoardService _kanbanService;
 
@@ -22,7 +23,7 @@ public class AddToDo
             _kanbanService = kanbanService;
         }
 
-        public async Task<int> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<int, Error>> Handle(Command request, CancellationToken cancellationToken)
         {
             return await _kanbanService.AddToDo(request.Name);
         }

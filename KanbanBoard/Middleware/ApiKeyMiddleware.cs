@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Middleware;
+namespace KanbanBoard.Api.Middleware;
 
 public class ApiKeyMiddleware
 {

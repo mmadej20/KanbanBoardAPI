@@ -1,18 +1,19 @@
-﻿using KanbanBoard.Domain;
-using KanbanBoard.Services.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
 using MediatR;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace KanbanBoard.Commands.Members
+namespace KanbanBoard.Api.Commands.Members
 {
     public class DeleteMember
     {
-        public record Command(int Id) : IRequest<OperationResult>;
+        public record Command(int Id) : IRequest<UnitResult<Error>>;
 
         //Handler
 
-        public class Handler : IRequestHandler<Command, OperationResult>
+        public class Handler : IRequestHandler<Command, UnitResult<Error>>
         {
             private readonly IMemberService _memberService;
 
@@ -21,7 +22,7 @@ namespace KanbanBoard.Commands.Members
                 _memberService = memberService;
             }
 
-            public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<UnitResult<Error>> Handle(Command request, CancellationToken cancellationToken)
             {
                 return await _memberService.DeleteMember(request.Id);
             }

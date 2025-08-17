@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
@@ -21,8 +22,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-    <ProjectReference Include="..\KanbanBoard\KanbanBoard.csproj" />
+    <ProjectReference Include="..\DataAccess\KanbanBoard.DataAccess.csproj" />
+    <ProjectReference Include="..\KanbanBoard.Application\KanbanBoard.Application.csproj" />
+    <ProjectReference Include="..\KanbanBoard.Domain\KanbanBoard.Domain.csproj" />
+    <ProjectReference Include="..\KanbanBoard.Infrastructure\KanbanBoard.Infrastructure.csproj" />
+    <ProjectReference Include="..\KanbanBoard\KanbanBoard.Api.csproj" />
   </ItemGroup>
 
 </Project>

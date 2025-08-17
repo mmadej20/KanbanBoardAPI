@@ -1,19 +1,16 @@
-using DataAccess;
-using KanbanBoard.Services;
-using KanbanBoard.Services.Interfaces;
-using MediatR;
+using KanbanBoard.Application.Services;
+using KanbanBoard.DataAccess;
+using KanbanBoard.Infrastructure.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using System;
-using Newtonsoft.Json;
 
-namespace KanbanBoard;
+namespace KanbanBoard.Api;
 
 public class Startup
 {
@@ -34,7 +31,7 @@ public class Startup
 
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "KanbanBoard", Version = "v1", Description="Simple API to manage boards with tasks and members" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "KanbanBoard", Version = "v1", Description = "Simple API to manage boards with tasks and members" });
             c.CustomSchemaIds(s => s.FullName.Replace("+", "."));
         });
 
@@ -52,11 +49,6 @@ public class Startup
         {
             options.UseSqlServer(Configuration.GetConnectionString("Local"));
         });
-
-        //services.AddDbContext<KanbanContext>(options =>
-        //{
-        //    options.UseSqlServer(Configuration.GetConnectionString("Local"));
-        //});
 
         services.AddScoped<IBoardService, BoardService>();
         services.AddScoped<IMemberService, MemberService>();

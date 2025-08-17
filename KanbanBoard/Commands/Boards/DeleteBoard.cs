@@ -1,18 +1,19 @@
-﻿using KanbanBoard.Domain;
-using KanbanBoard.Services.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
 using MediatR;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace KanbanBoard.Commands.Boards;
+namespace KanbanBoard.Api.Commands.Boards;
 
 public class DeleteBoard
 {
-    public record Command(int BoardId) : IRequest<OperationResult>;
+    public record Command(int BoardId) : IRequest<UnitResult<Error>>;
 
     //Handler
 
-    public class Handler : IRequestHandler<Command, OperationResult>
+    public class Handler : IRequestHandler<Command, UnitResult<Error>>
     {
         private readonly IBoardService _boardService;
 
@@ -21,7 +22,7 @@ public class DeleteBoard
             _boardService = boardService;
         }
 
-        public async Task<OperationResult> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<UnitResult<Error>> Handle(Command request, CancellationToken cancellationToken)
         {
             return await _boardService.DeleteBoard(request.BoardId);
         }

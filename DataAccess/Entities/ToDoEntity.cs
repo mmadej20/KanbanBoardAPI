@@ -1,11 +1,10 @@
-﻿using DataAccess.Enums;
+﻿using KanbanBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace DataAccess.Models
+namespace KanbanBoard.DataAccess.Entities
 {
-    public class ToDo
+    public class ToDoEntity
     {
         public int Id { get; set; }
 
@@ -20,11 +19,11 @@ namespace DataAccess.Models
         public int? BoardId { get; set; }
 
         [JsonIgnore]
-        public Board? Board { get; set; }
+        public BoardEntity? Board { get; set; }
 
         public int? AssignedMemberId { get; set; }
 
         [JsonIgnore]
-        public Member? AssignedMember { get; set; }
+        public MemberEntity? AssignedMember { get; set; }
     }
 }

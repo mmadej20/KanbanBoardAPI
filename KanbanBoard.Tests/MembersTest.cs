@@ -1,4 +1,5 @@
-﻿using KanbanBoard.Services;
+﻿using KanbanBoard.Application.Members.Errors;
+using KanbanBoard.Infrastructure.Services;
 using KanbanBoard.Tests.DatabaseFixture;
 using Shouldly;
 using TUnit.Core.Logging;
@@ -28,7 +29,7 @@ namespace KanbanBoard.Tests
 
             var result = await _memberService.AddMember(memberName, email);
 
-            result.IsSuccesfull.ShouldBe(true);
+            result.IsSuccess.ShouldBe(true);
         }
 
         [Test]
@@ -39,7 +40,8 @@ namespace KanbanBoard.Tests
 
             var result = await _memberService.AddMember(memberName, email);
 
-            result.Message.ShouldContain($"Email '{email}' is already in use!");
+            result.IsFailure.ShouldBe(true);
+            result.Error.ShouldBeEquivalentTo(MemberServiceErrors.EmailAlreadyInUse(email));
         }
 
         [Test]
@@ -49,9 +51,10 @@ namespace KanbanBoard.Tests
             await _memberService.UpdateMember(1, newName);
 
             var updatedMember = await _memberService.GetMemberById(1);
+            updatedMember.IsSuccess.ShouldBe(true);
 
-            _output.LogInformation($"Updated member name: {updatedMember.MemberName}");
-            updatedMember.MemberName.ShouldBe(newName);
+            _output.LogInformation($"Updated member name: {updatedMember.Value.MemberName}");
+            updatedMember.Value.MemberName.ShouldBe(newName);
         }
 
         [Test]
@@ -60,7 +63,7 @@ namespace KanbanBoard.Tests
             await _memberService.DeleteMember(2);
 
             var deletedMember = await _memberService.GetMemberById(2);
-            deletedMember.ShouldBeNull();
+            deletedMember.IsFailure.ShouldBe(true);
         }
     }
 }

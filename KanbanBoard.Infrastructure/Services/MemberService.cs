@@ -1,28 +1,31 @@
-﻿using CSharpFunctionalExtensions;
-using DataAccess;
-using DataAccess.Models;
-using KanbanBoard.Domain.Errors;
-using KanbanBoard.Models;
-using KanbanBoard.Services.Interfaces;
+﻿using AutoMapper;
+using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Members.Errors;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
+using KanbanBoard.DataAccess;
+using KanbanBoard.DataAccess.Entities;
+using KanbanBoard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
-namespace KanbanBoard.Services;
+namespace KanbanBoard.Infrastructure.Services;
 
-public class MemberService(KanbanContext kanbanContext) : IMemberService
+public class MemberService(KanbanContext kanbanContext, IMapper mapper) : IMemberService
 {
     private readonly KanbanContext _kanbanContext = kanbanContext;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<UnitResult<Error>> AddMember(string memberName, string email)
     {
-        var existing = await _kanbanContext.Members.FirstOrDefaultAsync(x => x.Email == email);
+        var existing = await _kanbanContext.Members
+            .FirstOrDefaultAsync(x => x.Email.ToLower() == email.ToLower());
 
         if (existing is not null)
         {
             return MemberServiceErrors.EmailAlreadyInUse(email);
         }
 
-        var newMember = await _kanbanContext.Members.AddAsync(new Member { MemberName = memberName, Email = email });
+        var newMember = await _kanbanContext.Members.AddAsync(new MemberEntity { MemberName = memberName, Email = email });
 
         var affectedEntries = await _kanbanContext.SaveChangesAsync();
 
@@ -56,17 +59,19 @@ public class MemberService(KanbanContext kanbanContext) : IMemberService
 
     public async Task<Result<Member, Error>> GetMemberById(int memberId)
     {
-        var member = await _kanbanContext.Members.FirstOrDefaultAsync(i => i.Id == memberId);
+        var memberEntity = await _kanbanContext.Members.AsNoTracking().FirstOrDefaultAsync(i => i.Id == memberId);
 
-        if (member is null)
+        if (memberEntity is null)
         {
             return MemberServiceErrors.MemberNotFound(memberId);
         }
 
+        var member = _mapper.Map<Member>(memberEntity);
+
         return member;
     }
 
-    public async Task<UnitResult<Error>> UpdateMember(int memberId, string memberName = null, string email = null)
+    public async Task<UnitResult<Error>> UpdateMember(int memberId, string? memberName = null, string? email = null)
     {
         if (string.IsNullOrEmpty(memberName) && string.IsNullOrEmpty(email))
         {
@@ -87,10 +92,17 @@ public class MemberService(KanbanContext kanbanContext) : IMemberService
 
         if (!string.IsNullOrEmpty(email))
         {
+            var emailExists = await _kanbanContext.Members
+                .AnyAsync(m => m.Email.ToLower() == email.ToLower() && m.Id != memberId);
+            if (emailExists)
+            {
+                return MemberServiceErrors.EmailAlreadyInUse(email);
+            }
+
             memberToUpdate.Email = email;
         }
 
-        _kanbanContext.Members.Update(memberToUpdate);
+        _kanbanContext.Members.Update(memberToUpdate); //TODO: Check if needed, as it might not be necessary if the entity is already being tracked by the context.
 
         var affectedEntries = await _kanbanContext.SaveChangesAsync();
 

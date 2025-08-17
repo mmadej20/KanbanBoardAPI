@@ -1,4 +1,4 @@
-﻿namespace KanbanBoard.Models
+﻿namespace KanbanBoard.Application.Models
 {
     public class Error(string errorCode, string message)
     {

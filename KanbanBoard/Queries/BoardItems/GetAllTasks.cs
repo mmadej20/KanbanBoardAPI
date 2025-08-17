@@ -1,19 +1,19 @@
-﻿using AutoMapper;
-using DataAccess.Models;
-using KanbanBoard.Services.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
+using KanbanBoard.Domain.Entities;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static KanbanBoard.Queries.BoardItems.GetToDoById;
 
-namespace KanbanBoard.Queries.BoardItems;
+namespace KanbanBoard.Api.Queries.BoardItems;
 
 public class GetAllTasks
 {
-    public record Query() : IRequest<IList<ToDo>>;
+    public record Query() : IRequest<Result<IList<ToDo>, Error>>;
 
-    public class Handler : IRequestHandler<Query, IList<ToDo>>
+    public class Handler : IRequestHandler<Query, Result<IList<ToDo>, Error>>
     {
         private readonly IBoardService _kanbanService;
 
@@ -22,7 +22,7 @@ public class GetAllTasks
             _kanbanService = kanbanService;
         }
 
-        public async Task<IList<ToDo>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<IList<ToDo>, Error>> Handle(Query request, CancellationToken cancellationToken)
         {
             var result = await _kanbanService.GetAllTasks();
             return result;

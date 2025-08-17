@@ -1,13 +1,7 @@
-﻿using DataAccess.Enums;
-using DataAccess.Models;
+﻿using KanbanBoard.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DataAccess
+namespace KanbanBoard.DataAccess
 {
     public class KanbanContext : DbContext
     {
@@ -15,35 +9,58 @@ namespace DataAccess
 
         public KanbanContext(DbContextOptions options) : base(options) { }
 
-        public virtual DbSet<ToDo> ToDos { get; set; }
+        public virtual DbSet<ToDoEntity> ToDos { get; set; }
 
-        public virtual DbSet<Member> Members { get; set; }
+        public virtual DbSet<MemberEntity> Members { get; set; }
 
-        public virtual DbSet<Board> Boards { get; set; }
+        public virtual DbSet<BoardEntity> Boards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ToDo>()
-                .Property(s => s.Status)
+            modelBuilder.Entity<ToDoEntity>()
+                .Property(t => t.Status)
                 .HasConversion<string>();
 
-            modelBuilder.Entity<Board>()
-                .Navigation(n => n.ToDoItems).AutoInclude();
-
-            modelBuilder.Entity<Board>()
-                .Navigation(n => n.Members).AutoInclude();
-
-            modelBuilder.Entity<Board>()
-                .HasMany(m => m.ToDoItems)
-                .WithOne(o => o.Board)
+            modelBuilder.Entity<BoardEntity>()
+                .HasMany(b => b.ToDoItems)
+                .WithOne(t => t.Board)
+                .HasForeignKey(t => t.BoardId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Member>()
-                .HasMany(t => t.ToDos)
+            modelBuilder.Entity<MemberEntity>()
+                .HasMany(m => m.ToDos)
                 .WithOne(t => t.AssignedMember)
-                .OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(t => t.AssignedMemberId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<BoardMemberEntity>()
+                .HasKey(bm => new { bm.BoardId, bm.MemberId });
+
+            modelBuilder.Entity<BoardMemberEntity>()
+                .HasOne(bm => bm.Board)
+                .WithMany(b => b.BoardMembers)
+                .HasForeignKey(bm => bm.BoardId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<BoardMemberEntity>()
+                .HasOne(bm => bm.Member)
+                .WithMany(m => m.BoardMembers)
+                .HasForeignKey(bm => bm.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //TODO: Check performance implications of AutoInclude
+
+            modelBuilder.Entity<BoardEntity>()
+                .Navigation(b => b.ToDoItems).AutoInclude();
+
+            modelBuilder.Entity<BoardEntity>()
+                .Navigation(b => b.BoardMembers).AutoInclude();
+
+            modelBuilder.Entity<BoardMemberEntity>()
+                .Navigation(bm => bm.Member).AutoInclude();
 
             base.OnModelCreating(modelBuilder);
         }
+
     }
 }

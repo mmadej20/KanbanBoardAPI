@@ -1,11 +1,11 @@
-﻿using KanbanBoard.Commands.BoardItems;
-using KanbanBoard.Queries.BoardItems;
+﻿using KanbanBoard.Api.Commands.BoardItems;
+using KanbanBoard.Api.Queries.BoardItems;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Controllers;
+namespace KanbanBoard.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -24,7 +24,13 @@ public class BoardItemController : ControllerBase
     public async Task<IActionResult> GetToDoById(int id)
     {
         var response = await _mediator.Send(new GetToDoById.Query(id));
-        return response == null ? NotFound() : Ok(response);
+
+        if (response.IsFailure)
+        {
+            return NotFound(response.Error);
+        }
+
+        return Ok(response);
     }
 
     //[HttpGet("all")]

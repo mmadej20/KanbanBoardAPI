@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
-namespace DataAccess.Models
+namespace KanbanBoard.DataAccess.Entities
 {
-    public class Member
+    public class MemberEntity
     {
         public int Id { get; set; }
 
@@ -15,10 +14,8 @@ namespace DataAccess.Models
         [MaxLength(100)]
         public required string Email { get; set; }
 
-        [JsonIgnore]
-        public List<Board>? Boards { get; set; }
+        public List<BoardMemberEntity> BoardMembers { get; set; } = [];
 
-        [JsonIgnore]
-        public List<ToDo>? ToDos { get; set; }
+        public List<ToDoEntity>? ToDos { get; set; }
     }
 }

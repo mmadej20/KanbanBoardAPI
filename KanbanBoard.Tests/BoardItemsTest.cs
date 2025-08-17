@@ -1,6 +1,6 @@
-using DataAccess.Enums;
-using DataAccess.Models;
-using KanbanBoard.Services;
+using KanbanBoard.Domain.Entities;
+using KanbanBoard.Domain.Enums;
+using KanbanBoard.Infrastructure.Services;
 using KanbanBoard.Tests.DatabaseFixture;
 using Shouldly;
 
@@ -33,7 +33,8 @@ namespace KanbanBoard.Tests
         public async Task GetAllTasksShouldReturnListOfToDo()
         {
             var tasks = await _boardService.GetAllTasks();
-            tasks.ShouldBeOfType<List<ToDo?>>();
+            tasks.IsSuccess.ShouldBe(true);
+            tasks.Value.ShouldBeOfType<List<ToDo?>>();
         }
 
         [Test]
@@ -41,12 +42,13 @@ namespace KanbanBoard.Tests
         public async Task StatusShouldBeChangeToInProgress()
         {
             var result = await _boardService.ChangeStatus(1, StatusType.InProgress);
-            
-            result.IsSuccesfull.ShouldBe(true);
+
+            result.IsSuccess.ShouldBe(true);
 
             var inProgressTask = await _boardService.GetToDoById(1);
 
-            inProgressTask.Status.ToString().ShouldBe(StatusType.InProgress.ToString());    
+            inProgressTask.IsSuccess.ShouldBe(true);
+            inProgressTask.Value.Status.ToString().ShouldBe(StatusType.InProgress.ToString());
         }
     }
 }

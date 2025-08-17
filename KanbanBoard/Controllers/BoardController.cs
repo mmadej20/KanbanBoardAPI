@@ -1,11 +1,12 @@
-﻿using KanbanBoard.Commands.Boards;
-using KanbanBoard.Queries.Boards;
+﻿using KanbanBoard.Api.Commands.Boards;
+using KanbanBoard.Api.Queries.Boards;
+using KanbanBoard.Application.Boards.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Controllers;
+namespace KanbanBoard.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -25,10 +26,23 @@ public class BoardController : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetBoardById(int id)
     {
         var response = await _mediator.Send(new GetBoardById.Query(id));
-        return response == null ? NotFound() : Ok(response);
+        if (response.IsFailure)
+        {
+            if (response.Error == BoardServiceErrors.BoardNotFound(id))
+            {
+                return NotFound(response.Error);
+            }
+            else
+            {
+                return BadRequest(BoardServiceErrors.GenericError);
+            }
+        }
+
+        return Ok(response);
     }
 
     [HttpPost("boardItem/create")]
@@ -49,10 +63,20 @@ public class BoardController : ControllerBase
     {
         var response = await _mediator.Send(command);
 
-        if (response.IsNotFound)
-            return NotFound(response.Message);
+        if (response.IsFailure)
+        {
+            if (response.Error == BoardServiceErrors.BoardNotFound(command.BoardId)
+                || response.Error == BoardServiceErrors.MemberNotFound(command.MemberId))
+            {
+                return NotFound(response.Error);
+            }
+            else
+            {
+                return BadRequest(response.Error);
+            }
+        }
 
-        return response.IsSuccesfull == false ? BadRequest(response) : Ok(response);
+        return Ok(response);
     }
 
     [HttpPatch("removeMember")]
@@ -63,10 +87,20 @@ public class BoardController : ControllerBase
     {
         var response = await _mediator.Send(command);
 
-        if (response.IsNotFound)
-            return NotFound(response.Message);
+        if (response.IsFailure)
+        {
+            if (response.Error == BoardServiceErrors.BoardNotFound(command.BoardId)
+                || response.Error == BoardServiceErrors.MemberNotFound(command.MemberId))
+            {
+                return NotFound(response.Error);
+            }
+            else
+            {
+                return BadRequest(response.Error);
+            }
+        }
 
-        return response.IsSuccesfull == false ? BadRequest(response) : Ok(response);
+        return Ok(response);
     }
 
     [HttpPost("assignToTask")]
@@ -77,9 +111,19 @@ public class BoardController : ControllerBase
     {
         var response = await _mediator.Send(command);
 
-        if (response.IsNotFound)
-            return NotFound(response.Message);
+        if (response.IsFailure)
+        {
+            if (response.Error == BoardServiceErrors.ItemNotFound(command.TaskId)
+                || response.Error == BoardServiceErrors.MemberNotFound(command.MemberId))
+            {
+                return NotFound(response.Error);
+            }
+            else
+            {
+                return BadRequest(response.Error);
+            }
+        }
 
-        return response.IsSuccesfull == false ? BadRequest(response) : Ok(response);
+        return Ok(response);
     }
 }

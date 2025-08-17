@@ -1,4 +1,4 @@
-﻿using KanbanBoard.Services.Interfaces;
+﻿using KanbanBoard.Application.Services;
 using KanbanBoard.Tests.DatabaseFixture;
 using Shouldly;
 
@@ -20,7 +20,7 @@ namespace KanbanBoard.Tests
         {
             var returnValue = await _boardService.CreateBoard(myBoardName);
 
-            returnValue.IsSuccesfull.ShouldBe(true);
+            returnValue.IsSuccess.ShouldBe(true);
         }
 
         [Test]
@@ -29,7 +29,9 @@ namespace KanbanBoard.Tests
         {
             await _boardService.CreateItemInBoard(boardId, taskName);
             var boardWithTask = await _boardService.GetBoardById(boardId);
-            var taskFromBoard = boardWithTask?.ToDoItems?.FirstOrDefault(x => x.Name == taskName);
+
+            boardWithTask.IsSuccess.ShouldBe(true);
+            var taskFromBoard = boardWithTask.Value.ToDoItems?.FirstOrDefault(x => x.Name == taskName);
 
             taskFromBoard?.Name.ShouldBe(taskName);
         }
@@ -38,13 +40,15 @@ namespace KanbanBoard.Tests
         public async Task DeleteBoardShouldDeleteAssignedTasks()
         {
             var board = await _boardService.GetBoardById(2);
-            var taskAssignedToBoard = board.ToDoItems?.FirstOrDefault();
+
+            board.IsSuccess.ShouldBe(true);
+            var taskAssignedToBoard = board.Value.ToDoItems?.FirstOrDefault();
 
             await _boardService.DeleteBoard(2);
-            
+
             var result = await _boardService.GetToDoById(taskAssignedToBoard!.Id);
 
-            result.ShouldBeNull();
+            result.IsFailure.ShouldBe(true);
         }
     }
 }

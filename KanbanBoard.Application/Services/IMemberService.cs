@@ -1,9 +1,8 @@
 ﻿using CSharpFunctionalExtensions;
-using DataAccess.Models;
-using KanbanBoard.Models;
-using System.Threading.Tasks;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Domain.Entities;
 
-namespace KanbanBoard.Services.Interfaces;
+namespace KanbanBoard.Application.Services;
 
 public interface IMemberService
 {
@@ -11,7 +10,7 @@ public interface IMemberService
 
     Task<UnitResult<Error>> AddMember(string memberName, string email);
 
-    Task<UnitResult<Error>> UpdateMember(int memberId, string memberName, string email);
+    Task<UnitResult<Error>> UpdateMember(int memberId, string? memberName = null, string? email = null);
 
     Task<UnitResult<Error>> DeleteMember(int memberId);
 }

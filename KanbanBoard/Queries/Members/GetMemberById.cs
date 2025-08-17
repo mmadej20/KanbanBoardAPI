@@ -1,19 +1,19 @@
-﻿using AutoMapper;
-using DataAccess.Models;
-using KanbanBoard.Services.Interfaces;
+﻿using CSharpFunctionalExtensions;
+using KanbanBoard.Application.Models;
+using KanbanBoard.Application.Services;
+using KanbanBoard.Domain.Entities;
 using MediatR;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace KanbanBoard.Queries.Members
+namespace KanbanBoard.Api.Queries.Members
 {
     public class GetMemberById
     {
-        public record Query(int Id) : IRequest<Member>;
+        public record Query(int Id) : IRequest<Result<Member, Error>>;
 
         //Handler
-        public class Handler : IRequestHandler<Query, Member>
+        public class Handler : IRequestHandler<Query, Result<Member, Error>>
         {
             private readonly IMemberService _memberService;
 
@@ -22,10 +22,15 @@ namespace KanbanBoard.Queries.Members
                 _memberService = memberService;
             }
 
-            public async Task<Member> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<Result<Member, Error>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var result = await _memberService.GetMemberById(request.Id);
-                return result;
+                if (result.IsSuccess)
+                {
+                    return result.Value;
+                }
+
+                return result.Error;
             }
         }
     }
