@@ -5,7 +5,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.Boards;
+namespace KanbanBoard.Application.Boards.Commands;
 
 public class CreateBoard
 {

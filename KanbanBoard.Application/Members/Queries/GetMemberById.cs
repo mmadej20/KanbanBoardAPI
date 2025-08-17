@@ -6,7 +6,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Queries.Members
+namespace KanbanBoard.Application.Members.Queries
 {
     public class GetMemberById
     {

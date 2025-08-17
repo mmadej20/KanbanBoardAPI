@@ -5,11 +5,11 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.Members
+namespace KanbanBoard.Application.Members.Commands
 {
-    public class AddMember
+    public class DeleteMember
     {
-        public record Command(string Name, string Email) : IRequest<UnitResult<Error>>;
+        public record Command(int Id) : IRequest<UnitResult<Error>>;
 
         //Handler
 
@@ -24,7 +24,7 @@ namespace KanbanBoard.Api.Commands.Members
 
             public async Task<UnitResult<Error>> Handle(Command request, CancellationToken cancellationToken)
             {
-                return await _memberService.AddMember(request.Name, request.Email);
+                return await _memberService.DeleteMember(request.Id);
             }
         }
     }

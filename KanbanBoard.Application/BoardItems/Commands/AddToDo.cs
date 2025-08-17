@@ -1,16 +1,16 @@
 ﻿using CSharpFunctionalExtensions;
 using KanbanBoard.Application.Models;
 using KanbanBoard.Application.Services;
-using KanbanBoard.Domain.Enums;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.BoardItems;
+namespace KanbanBoard.Application.BoardItems.Commands;
 
-public class MarkAsInProgress
+public class AddToDo
 {
-    public record Command(int Id) : IRequest<Result<int, Error>>;
+    //Command
+    public record Command(string Name) : IRequest<Result<int, Error>>;
+
+    //Handler
 
     public class Handler : IRequestHandler<Command, Result<int, Error>>
     {
@@ -23,7 +23,7 @@ public class MarkAsInProgress
 
         public async Task<Result<int, Error>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await _kanbanService.ChangeStatus(request.Id, StatusType.InProgress);
+            return await _kanbanService.AddToDo(request.Name);
         }
     }
 }

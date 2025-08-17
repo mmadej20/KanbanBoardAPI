@@ -6,7 +6,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.BoardItems;
+namespace KanbanBoard.Application.BoardItems.Commands;
 
 public class MarkAsCompleted
 {

@@ -1,5 +1,5 @@
-﻿using KanbanBoard.Api.Commands.BoardItems;
-using KanbanBoard.Api.Queries.BoardItems;
+﻿using KanbanBoard.Application.BoardItems.Commands;
+using KanbanBoard.Application.BoardItems.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

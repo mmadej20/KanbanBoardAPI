@@ -1,6 +1,6 @@
-﻿using KanbanBoard.Api.Commands.Boards;
-using KanbanBoard.Api.Queries.Boards;
+﻿using KanbanBoard.Application.Boards.Commands;
 using KanbanBoard.Application.Boards.Errors;
+using KanbanBoard.Application.Boards.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

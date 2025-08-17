@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Queries.BoardItems;
+namespace KanbanBoard.Application.BoardItems.Queries;
 
 public class GetAllTasks
 {

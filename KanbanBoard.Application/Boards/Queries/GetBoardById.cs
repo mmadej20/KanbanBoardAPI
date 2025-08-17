@@ -7,7 +7,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Queries.Boards;
+namespace KanbanBoard.Application.Boards.Queries;
 
 public class GetBoardById
 {

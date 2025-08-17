@@ -5,11 +5,11 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.Boards;
+namespace KanbanBoard.Application.Boards.Commands;
 
-public class DeleteBoard
+public class CreateItemInBoard
 {
-    public record Command(int BoardId) : IRequest<UnitResult<Error>>;
+    public record Command(int BoardId, string Name) : IRequest<UnitResult<Error>>;
 
     //Handler
 
@@ -24,7 +24,7 @@ public class DeleteBoard
 
         public async Task<UnitResult<Error>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await _boardService.DeleteBoard(request.BoardId);
+            return await _boardService.CreateItemInBoard(request.BoardId, request.Name);
         }
     }
 }

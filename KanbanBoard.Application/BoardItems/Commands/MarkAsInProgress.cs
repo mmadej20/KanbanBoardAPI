@@ -6,9 +6,9 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.BoardItems;
+namespace KanbanBoard.Application.BoardItems.Commands;
 
-public class MarkAsCancelled
+public class MarkAsInProgress
 {
     public record Command(int Id) : IRequest<Result<int, Error>>;
 
@@ -23,7 +23,7 @@ public class MarkAsCancelled
 
         public async Task<Result<int, Error>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await _kanbanService.ChangeStatus(request.Id, StatusType.Canceled);
+            return await _kanbanService.ChangeStatus(request.Id, StatusType.InProgress);
         }
     }
 }

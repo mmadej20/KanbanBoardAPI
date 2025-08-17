@@ -1,5 +1,5 @@
-﻿using KanbanBoard.Api.Commands.Members;
-using KanbanBoard.Api.Queries.Members;
+﻿using KanbanBoard.Application.Members.Commands;
+using KanbanBoard.Application.Members.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

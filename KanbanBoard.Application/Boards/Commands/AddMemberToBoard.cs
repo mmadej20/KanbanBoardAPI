@@ -5,26 +5,26 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.Members
+namespace KanbanBoard.Application.Boards.Commands
 {
-    public class UpdateMember
+    public class AddMemberToBoard
     {
-        public record Command(int Id, string Name, string Email) : IRequest<UnitResult<Error>>;
+        public record Command(int BoardId, int MemberId) : IRequest<UnitResult<Error>>;
 
         //Handler
 
         public class Handler : IRequestHandler<Command, UnitResult<Error>>
         {
-            private readonly IMemberService _memberService;
+            private readonly IBoardService _boardService;
 
-            public Handler(IMemberService memberService)
+            public Handler(IBoardService boardService)
             {
-                _memberService = memberService;
+                _boardService = boardService;
             }
 
             public async Task<UnitResult<Error>> Handle(Command request, CancellationToken cancellationToken)
             {
-                return await _memberService.UpdateMember(request.Id, request.Name, request.Email);
+                return await _boardService.AddMemberToBoard(request.BoardId, request.MemberId);
             }
         }
     }

@@ -1,18 +1,16 @@
 ﻿using CSharpFunctionalExtensions;
 using KanbanBoard.Application.Models;
 using KanbanBoard.Application.Services;
+using KanbanBoard.Domain.Enums;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace KanbanBoard.Api.Commands.BoardItems;
+namespace KanbanBoard.Application.BoardItems.Commands;
 
-public class AddToDo
+public class MarkAsCancelled
 {
-    //Command
-    public record Command(string Name) : IRequest<Result<int, Error>>;
-
-    //Handler
+    public record Command(int Id) : IRequest<Result<int, Error>>;
 
     public class Handler : IRequestHandler<Command, Result<int, Error>>
     {
@@ -25,7 +23,7 @@ public class AddToDo
 
         public async Task<Result<int, Error>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await _kanbanService.AddToDo(request.Name);
+            return await _kanbanService.ChangeStatus(request.Id, StatusType.Canceled);
         }
     }
 }
