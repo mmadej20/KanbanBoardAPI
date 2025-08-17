@@ -61,7 +61,6 @@ namespace KanbanBoard.Tests.DatabaseFixture
                        .UseSqlServer(_connectionString)
                        .EnableThreadSafetyChecks()
                        .Options);
-
     }
 
     public static class ServicesWithFixtureDatabase

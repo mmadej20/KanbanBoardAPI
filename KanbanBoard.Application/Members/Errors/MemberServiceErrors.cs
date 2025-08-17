@@ -17,6 +17,5 @@ namespace KanbanBoard.Application.Members.Errors
         public static Error NothingToUpdate => new Error("kanbanboard.nothingtoupdate", "There is nothing to update");
 
         public static Error GenericError => new("kanbanboard.genericerror", "An error occurred while processing your request");
-
     }
 }

@@ -41,6 +41,5 @@ namespace KanbanBoard.Application.Boards.Errors
         }
 
         public static Error NoTasksFound => new Error("kanbanboard.notasksfound", $"There are no tasks available");
-        
     }
 }

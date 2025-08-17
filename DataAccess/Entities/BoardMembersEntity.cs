@@ -10,5 +10,4 @@ public class BoardMemberEntity
 
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     public bool IsOwner { get; set; }
-
 }

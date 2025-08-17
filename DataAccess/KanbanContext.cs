@@ -61,6 +61,5 @@ namespace KanbanBoard.DataAccess
 
             base.OnModelCreating(modelBuilder);
         }
-
     }
 }
