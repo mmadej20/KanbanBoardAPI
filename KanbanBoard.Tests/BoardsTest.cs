@@ -7,14 +7,16 @@ namespace KanbanBoard.Tests
     [ClassDataSource(typeof(KanbanDatabaseFixture))]
     public class BoardsTest
     {
-        private readonly IBoardService _boardService;
+        private static IBoardService _boardService;
 
-        public BoardsTest()
+        [Before(HookType.Class)]
+        public static void Initialize()
         {
             _boardService = ServicesWithFixtureDatabase.GetBoardService();
         }
 
         [Test]
+        [NotInParallel]
         [Arguments("Board created by test")]
         public async Task CreateBoardShouldBeSuccessful(string myBoardName)
         {
@@ -24,6 +26,7 @@ namespace KanbanBoard.Tests
         }
 
         [Test]
+        [NotInParallel]
         [Arguments(1, "Task assigned to board of id 1")]
         public async Task TaskShouldBeAssignedToBoard(int boardId, string taskName)
         {
@@ -37,6 +40,7 @@ namespace KanbanBoard.Tests
         }
 
         [Test]
+        [NotInParallel]
         public async Task DeleteBoardShouldDeleteAssignedTasks()
         {
             var board = await _boardService.GetBoardById(2);

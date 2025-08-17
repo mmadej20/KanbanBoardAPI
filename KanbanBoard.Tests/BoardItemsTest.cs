@@ -10,11 +10,11 @@ namespace KanbanBoard.Tests
     public class BoardItemsTest
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        private BoardService _boardService;
+        private static BoardService _boardService;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        [Before(HookType.Test)]
-        public void Initialize()
+        [Before(HookType.Class)]
+        public static void Initialize()
         {
             _boardService = ServicesWithFixtureDatabase.GetBoardService();
         }
@@ -41,11 +41,11 @@ namespace KanbanBoard.Tests
         [NotInParallel]
         public async Task StatusShouldBeChangeToInProgress()
         {
-            var result = await _boardService.ChangeStatus(1, StatusType.InProgress);
+            var result = await _boardService.ChangeStatus(2, StatusType.InProgress);
 
             result.IsSuccess.ShouldBe(true);
 
-            var inProgressTask = await _boardService.GetToDoById(1);
+            var inProgressTask = await _boardService.GetToDoById(2);
 
             inProgressTask.IsSuccess.ShouldBe(true);
             inProgressTask.Value.Status.ToString().ShouldBe(StatusType.InProgress.ToString());

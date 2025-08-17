@@ -10,18 +10,24 @@ namespace KanbanBoard.Tests
     public class MembersTest
     {
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
-        private MemberService _memberService;
-        private DefaultLogger _output;
+        private static MemberService _memberService;
+        private static DefaultLogger _output;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        [Before(HookType.Test)]
-        public void Initialize()
+        [Before(HookType.Class)]
+        public static void InitializeDatabase()
         {
             _memberService = ServicesWithFixtureDatabase.GetMemberService();
+        }
+
+        [Before(HookType.Test)]
+        public void InitializeLogger()
+        {
             _output = TestContext.Current!.GetDefaultLogger();
         }
 
         [Test]
+        [NotInParallel]
         public async Task MemberShouldBeAddedToDatabase()
         {
             var memberName = "New Member";
@@ -33,6 +39,7 @@ namespace KanbanBoard.Tests
         }
 
         [Test]
+        [NotInParallel]
         public async Task ShouldReturnEmailAlreadyInUse()
         {
             var memberName = "user2";
@@ -45,6 +52,7 @@ namespace KanbanBoard.Tests
         }
 
         [Test]
+        [NotInParallel]
         [Arguments("User1Updated")]
         public async Task MemberShouldBeUpdatedWithNewName(string newName)
         {
@@ -58,6 +66,7 @@ namespace KanbanBoard.Tests
         }
 
         [Test]
+        [NotInParallel]
         public async Task MemberShouldBeRemoved()
         {
             await _memberService.DeleteMember(2);

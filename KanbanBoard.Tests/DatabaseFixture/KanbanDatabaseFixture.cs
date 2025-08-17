@@ -38,11 +38,13 @@ namespace KanbanBoard.Tests.DatabaseFixture
                         context.Database.EnsureCreated();
                         context.Boards.AddRange(
                             new BoardEntity { Name = "Board623" },
-                            new BoardEntity { Name = "BoardToDelete" }
+                            new BoardEntity { Name = "BoardToDelete" },
+                            new BoardEntity { Name = "BoardWithTasks" }
                             );
                         context.ToDos.AddRange(
-                            new ToDoEntity { Name = "Task432", Status = StatusType.ToDo, BoardId = 2 },
-                            new ToDoEntity { Name = "Task999", Status = StatusType.OnHold, BoardId = 2 }
+                            new ToDoEntity { Name = "TaskInBoardToDelete", Status = StatusType.ToDo, BoardId = 2 },
+                            new ToDoEntity { Name = "Task432", Status = StatusType.ToDo, BoardId = 3 },
+                            new ToDoEntity { Name = "Task999", Status = StatusType.OnHold, BoardId = 3 }
                             );
                         context.Members.AddRange(
                             new MemberEntity { MemberName = "User1", Email = "user1@liamg.com" },
