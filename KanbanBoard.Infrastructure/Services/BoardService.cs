@@ -121,7 +121,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     /// <inheritdoc/>
     public async Task<UnitResult<Error>> AssignMemberToTask(int taskId, int memberId)
     {
-        var taskToAssign = await _repository.ToDos.FindAsync(taskId);
+        var taskToAssign = await _repository.ToDos.Include(item => item.Board).FirstOrDefaultAsync(task => task.Id == taskId);
 
         if (taskToAssign == null)
         {
@@ -136,7 +136,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
             return BoardServiceErrors.MemberNotFound(memberId);
         }
 
-        var isMemberAssignedToBoard = memberToAssign.BoardMembers!
+        var isMemberAssignedToBoard = taskToAssign.Board!.BoardMembers!
             .Any(bm => bm.BoardId == taskToAssign.BoardId);
 
         if (!isMemberAssignedToBoard)
