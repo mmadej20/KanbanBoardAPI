@@ -9,14 +9,9 @@ namespace KanbanBoard.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MemberController : ControllerBase
+    public class MemberController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public MemberController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -30,7 +25,7 @@ namespace KanbanBoard.Api.Controllers
                 return NotFound(response.Error);
             }
 
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         [HttpPost("add")]
@@ -45,12 +40,11 @@ namespace KanbanBoard.Api.Controllers
                 return BadRequest(response.Error);
             }
 
-            return Ok(response);
+            return Ok();
         }
 
         [HttpPatch]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateMember(UpdateMember.Command command)
         {
@@ -61,7 +55,7 @@ namespace KanbanBoard.Api.Controllers
                 return NotFound(response.Error);
             }
 
-            return Ok(response);
+            return Ok();
         }
     }
 }

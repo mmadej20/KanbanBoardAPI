@@ -9,14 +9,9 @@ namespace KanbanBoard.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class BoardItemController : ControllerBase
+public class BoardItemController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public BoardItemController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -25,39 +20,56 @@ public class BoardItemController : ControllerBase
     {
         var response = await _mediator.Send(new GetToDoById.Query(id));
 
-        if (response.IsFailure)
-        {
-            return NotFound(response.Error);
-        }
-
-        return Ok(response);
+        return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
     }
 
-    //[HttpGet("all")]
-    //[ProducesResponseType(StatusCodes.Status200OK)]
-    //[ProducesResponseType(StatusCodes.Status404NotFound)]
-    //public async Task<IActionResult> GetAllTasks()
-    //{
-    //    var response = await _mediator.Send(new GetAllTasks.Query());
-    //    return response == null ? NotFound("There is no available tasks") : Ok(response);
-    //}
+    [HttpGet("all")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllTasks()
+    {
+        var response = await _mediator.Send(new GetAllTasks.Query());
+
+        return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
+    }
 
     //[HttpPost("add")]
     //[ProducesResponseType(StatusCodes.Status200OK)]
-    //public async Task<IActionResult> AddToDo(AddToDo.Command command) => Ok(await _mediator.Send(command));
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+    //public async Task<IActionResult> AddToDo(AddToDo.Command command)
+    //{
+    //    var response = await _mediator.Send(command);
+
+    //    return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
+    //}
 
     [HttpPatch("{id}/complete/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsCompleted(int id) => Ok(await _mediator.Send(new MarkAsCompleted.Command(id)));
+    public async Task<IActionResult> MarkAsCompleted(int id)
+    {
+        var response = await _mediator.Send(new MarkAsCompleted.Command(id));
+
+        return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
+    }
 
     [HttpPatch("{id}/cancel/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsCancelled(int id) => Ok(await _mediator.Send(new MarkAsCancelled.Command(id)));
+    public async Task<IActionResult> MarkAsCancelled(int id)
+    {
+        var response = await _mediator.Send(new MarkAsCancelled.Command(id));
+
+        return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
+    }
 
     [HttpPatch("{id}/inProgress/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsInProgress(int id) => Ok(await _mediator.Send(new MarkAsInProgress.Command(id)));
+    public async Task<IActionResult> MarkAsInProgress(int id)
+    {
+        var response = await _mediator.Send(new MarkAsInProgress.Command(id));
+
+        return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
+    }
 }

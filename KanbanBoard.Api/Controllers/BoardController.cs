@@ -10,18 +10,22 @@ namespace KanbanBoard.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class BoardController : ControllerBase
+public class BoardController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public BoardController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateBoard(CreateBoard.Command command) => Ok(await _mediator.Send(command));
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateBoard(CreateBoard.Command command)
+    {
+        var response = await _mediator.Send(command);
+        if (response.IsFailure)
+        {
+            return BadRequest(response.Error);
+        }
+        return Ok();
+    }
 
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -41,19 +45,38 @@ public class BoardController : ControllerBase
                 return BadRequest(BoardServiceErrors.GenericError);
             }
         }
-
-        return Ok(response);
+        return Ok(response.Value);
     }
 
     [HttpPost("boardItem/create")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateItemInBoard(CreateItemInBoard.Command command) => Ok(await _mediator.Send(command));
+    public async Task<IActionResult> CreateItemInBoard(CreateItemInBoard.Command command)
+    {
+        var response = await _mediator.Send(command);
+
+        if (response.IsFailure)
+        {
+            return BadRequest(response.Error);
+        }
+
+        return Ok();
+    }
 
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteBoard(DeleteBoard.Command command) => Ok(await _mediator.Send(command));
+    public async Task<IActionResult> DeleteBoard(DeleteBoard.Command command)
+    {
+        var response = await _mediator.Send(command);
+
+        if (response.IsFailure)
+        {
+            return BadRequest(response.Error);
+        }
+
+        return Ok();
+    }
 
     [HttpPost("addMember")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -76,7 +99,7 @@ public class BoardController : ControllerBase
             }
         }
 
-        return Ok(response);
+        return Ok();
     }
 
     [HttpPatch("removeMember")]
@@ -100,7 +123,7 @@ public class BoardController : ControllerBase
             }
         }
 
-        return Ok(response);
+        return Ok();
     }
 
     [HttpPost("assignToTask")]
@@ -124,6 +147,6 @@ public class BoardController : ControllerBase
             }
         }
 
-        return Ok(response);
+        return Ok();
     }
 }
