@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System;
 
 namespace KanbanBoard.Api;
@@ -24,10 +25,6 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
-        //    .AddNewtonsoftJson(options =>
-        //     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-        //); 
-        //Remove JSONIgnore from properties and uncomment this to get response with full object
 
         services.AddSwaggerGen(c =>
         {
@@ -52,6 +49,14 @@ public class Startup
 
         services.AddScoped<IBoardService, BoardService>();
         services.AddScoped<IMemberService, MemberService>();
+
+        var logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(Configuration)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+
+        services.AddSerilog(logger);
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -73,6 +78,7 @@ public class Startup
 
         //app.UseMiddleware<ApiKeyMiddleware>();
         app.UseAuthorization();
+        app.UseSerilogRequestLogging();
 
         app.UseEndpoints(endpoints =>
         {

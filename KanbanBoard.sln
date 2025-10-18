@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.Tests", "KanbanBoard.Tests\KanbanBoard.Tests.csproj", "{2CF7CEFE-07AB-49DB-B8DD-1D69ECEBFEAF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.IntegrationTests", "KanbanBoard.Tests\KanbanBoard.IntegrationTests.csproj", "{2CF7CEFE-07AB-49DB-B8DD-1D69ECEBFEAF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KanbanBoard.Api", "KanbanBoard.Api\KanbanBoard.Api.csproj", "{23115592-C920-4694-8C2F-731F4ED9485E}"
 EndProject
