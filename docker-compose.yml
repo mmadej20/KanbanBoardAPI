@@ -1,0 +1,45 @@
+services:
+  db:
+    env_file:
+      - .env
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: kanban_sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=${MSSQL_PID:-Express}
+      - SA_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-1433}:1433"
+    volumes:
+      - kanban_db_data:/var/opt/mssql
+    restart: unless-stopped
+    networks:
+      - kanban_net
+
+  api:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: KanbanBoard.Api/Dockerfile
+      args:
+        BUILD_CONFIGURATION: ${BUILD_CONFIGURATION:-Release}
+    container_name: kanban_api
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS:-http://+:8080}
+      - ConnectionStrings__Local=Server=${DB_HOST};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=true
+    ports:
+      - "${ASPNETCORE_PORT:-8080}:8080"
+    restart: unless-stopped
+    networks:
+      - kanban_net
+
+volumes:
+  kanban_db_data:
+
+networks:
+  kanban_net:
+    driver: bridge
