@@ -1,4 +1,5 @@
 ﻿using KanbanBoard.Api.Contracts.BoardItem.Requests;
+using KanbanBoard.Api.Routing;
 using KanbanBoard.Application.BoardItems.Commands;
 using KanbanBoard.Application.BoardItems.Queries;
 using KanbanBoard.Application.Boards.Commands;
@@ -11,13 +12,13 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route(ApiRoutes.V1.BoardItems.Base)]
 [ApiController]
 public class BoardItemController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    [HttpGet("{id}")]
+    [HttpGet(ApiRoutes.V1.BoardItems.GetById)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBoardItemById([FromRoute] Guid id)
@@ -27,7 +28,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
         return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
     }
 
-    [HttpGet("all")]
+    [HttpGet(ApiRoutes.V1.BoardItems.GetAll)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllBoardItems()
@@ -37,7 +38,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
         return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
     }
 
-    [HttpPost("assignToBoardItem")]
+    [HttpPost(ApiRoutes.V1.BoardItems.AssignMember)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -61,7 +62,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
-    [HttpPut("{id}/complete")]
+    [HttpPut(ApiRoutes.V1.BoardItems.MarkAsCompleted)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> MarkAsCompleted([FromRoute] Guid id)
@@ -71,7 +72,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
         return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     }
 
-    [HttpPut("{id}/cancel")]
+    [HttpPut(ApiRoutes.V1.BoardItems.MarkAsCancelled)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> MarkAsCancelled([FromRoute] Guid id)
@@ -81,7 +82,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
         return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     }
 
-    [HttpPut("{id}/inProgress")]
+    [HttpPut(ApiRoutes.V1.BoardItems.MarkAsInProgress)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> MarkAsInProgress([FromRoute] Guid id)

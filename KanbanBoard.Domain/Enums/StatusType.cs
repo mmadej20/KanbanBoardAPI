@@ -3,6 +3,7 @@
     public enum StatusType
     {
         Canceled,
+        New,
         ToDo,
         InProgress,
         OnHold,

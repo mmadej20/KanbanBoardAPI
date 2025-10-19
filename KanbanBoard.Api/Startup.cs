@@ -35,7 +35,7 @@ public class Startup
         services.AddAutoMapper((config) =>
         {
             config.AddMaps(AppDomain.CurrentDomain.GetAssemblies());
-        }); ;
+        });
 
         services.AddMediatR((config) =>
         {

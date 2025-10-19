@@ -1,5 +1,6 @@
 ﻿using KanbanBoard.Api.Contracts.Board.Reqeusts;
 using KanbanBoard.Api.Mapping;
+using KanbanBoard.Api.Routing;
 using KanbanBoard.Application.Boards.Commands;
 using KanbanBoard.Application.Boards.Errors;
 using KanbanBoard.Application.Boards.Queries;
@@ -11,13 +12,13 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Api.Controllers;
 
-[Route("api/[controller]")]
+[Route(ApiRoutes.V1.Boards.Base)]
 [ApiController]
 public class BoardController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
 
-    [HttpPost("create")]
+    [HttpPost(ApiRoutes.V1.Boards.Create)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateBoard([FromBody] CreateBoardRequest request)
@@ -31,7 +32,7 @@ public class BoardController(IMediator mediator) : ControllerBase
         return Created();
     }
 
-    [HttpGet("{boardId}")]
+    [HttpGet(ApiRoutes.V1.Boards.GetById)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,7 +60,7 @@ public class BoardController(IMediator mediator) : ControllerBase
         return BadRequest(BoardServiceErrors.GenericError);
     }
 
-    [HttpPost("boardItem/create")]
+    [HttpPost(ApiRoutes.V1.BoardItems.Create)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateItemInBoard([FromBody] CreateItemInBoardRequest request)
@@ -74,7 +75,7 @@ public class BoardController(IMediator mediator) : ControllerBase
         return Created();
     }
 
-    [HttpDelete("delete")]
+    [HttpDelete(ApiRoutes.V1.Boards.Delete)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteBoard([FromRoute] Guid boardId)
@@ -89,7 +90,7 @@ public class BoardController(IMediator mediator) : ControllerBase
         return Ok();
     }
 
-    [HttpPost("addMember")]
+    [HttpPost(ApiRoutes.V1.Boards.AddMember)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -113,7 +114,7 @@ public class BoardController(IMediator mediator) : ControllerBase
         return Created();
     }
 
-    [HttpPut("removeMember")]
+    [HttpPut(ApiRoutes.V1.Boards.RemoveMember)]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

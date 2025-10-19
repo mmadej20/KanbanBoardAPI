@@ -1,4 +1,5 @@
-﻿using KanbanBoard.Application.Members.Commands;
+﻿using KanbanBoard.Api.Routing;
+using KanbanBoard.Application.Members.Commands;
 using KanbanBoard.Application.Members.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -8,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace KanbanBoard.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route(ApiRoutes.V1.Members.Base)]
     [ApiController]
     public class MemberController(IMediator mediator) : ControllerBase
     {
         private readonly IMediator _mediator = mediator;
 
-        [HttpGet("{id}")]
+        [HttpGet(ApiRoutes.V1.Members.GetById)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMemberById([FromRoute] Guid id)
@@ -29,7 +30,7 @@ namespace KanbanBoard.Api.Controllers
             return Ok(response.Value);
         }
 
-        [HttpPost("add")]
+        [HttpPost(ApiRoutes.V1.Members.Add)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddMember(AddMember.Command command)
@@ -44,7 +45,7 @@ namespace KanbanBoard.Api.Controllers
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut(ApiRoutes.V1.Members.Update)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateMember(UpdateMember.Command command)
