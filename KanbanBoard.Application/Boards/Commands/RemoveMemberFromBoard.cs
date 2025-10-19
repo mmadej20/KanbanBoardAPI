@@ -2,25 +2,18 @@
 using KanbanBoard.Application.Models;
 using KanbanBoard.Application.Services;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KanbanBoard.Application.Boards.Commands
 {
     public class RemoveMemberFromBoard
     {
-        public record Command(int BoardId, int MemberId) : IRequest<UnitResult<Error>>;
+        public record Command(Guid BoardId, Guid MemberId) : IRequest<UnitResult<Error>>;
 
         //Handler
 
-        public class Handler : IRequestHandler<Command, UnitResult<Error>>
+        public class Handler(IBoardService boardService) : IRequestHandler<Command, UnitResult<Error>>
         {
-            private readonly IBoardService _boardService;
-
-            public Handler(IBoardService boardService)
-            {
-                _boardService = boardService;
-            }
+            private readonly IBoardService _boardService = boardService;
 
             public async Task<UnitResult<Error>> Handle(Command request, CancellationToken cancellationToken)
             {

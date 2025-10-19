@@ -3,23 +3,16 @@ using KanbanBoard.Application.Models;
 using KanbanBoard.Application.Services;
 using KanbanBoard.Domain.Enums;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KanbanBoard.Application.BoardItems.Commands;
 
 public class MarkAsInProgress
 {
-    public record Command(int Id) : IRequest<Result<int, Error>>;
+    public record Command(Guid Id) : IRequest<Result<int, Error>>;
 
-    public class Handler : IRequestHandler<Command, Result<int, Error>>
+    public class Handler(IBoardService kanbanService) : IRequestHandler<Command, Result<int, Error>>
     {
-        private readonly IBoardService _kanbanService;
-
-        public Handler(IBoardService kanbanService)
-        {
-            _kanbanService = kanbanService;
-        }
+        private readonly IBoardService _kanbanService = kanbanService;
 
         public async Task<Result<int, Error>> Handle(Command request, CancellationToken cancellationToken)
         {

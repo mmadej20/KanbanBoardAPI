@@ -1,29 +1,19 @@
-﻿using AutoMapper;
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using KanbanBoard.Application.Models;
 using KanbanBoard.Application.Services;
 using KanbanBoard.Domain.Entities;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KanbanBoard.Application.Boards.Queries;
 
 public class GetBoardById
 {
-    public record Query(int Id) : IRequest<Result<Board, Error>>;
+    public record Query(Guid Id) : IRequest<Result<Board, Error>>;
 
     //Handler
-    public class Handler : IRequestHandler<Query, Result<Board, Error>>
+    public class Handler(IBoardService boardService) : IRequestHandler<Query, Result<Board, Error>>
     {
-        private readonly IBoardService _boardService;
-        private readonly IMapper _mapper;
-
-        public Handler(IBoardService boardService, IMapper mapper)
-        {
-            _boardService = boardService;
-            _mapper = mapper;
-        }
+        private readonly IBoardService _boardService = boardService;
 
         public async Task<Result<Board, Error>> Handle(Query request, CancellationToken cancellationToken)
         {
