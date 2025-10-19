@@ -2,7 +2,7 @@
 {
     public class Member
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public required string MemberName { get; set; }
 
