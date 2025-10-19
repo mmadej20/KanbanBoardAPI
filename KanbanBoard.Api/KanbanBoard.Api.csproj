@@ -43,4 +43,8 @@
     <ProjectReference Include="..\KanbanBoard.Infrastructure\KanbanBoard.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\BoardItem\Requests\" />
+  </ItemGroup>
+
 </Project>

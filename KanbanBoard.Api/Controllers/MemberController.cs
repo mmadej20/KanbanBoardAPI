@@ -3,6 +3,7 @@ using KanbanBoard.Application.Members.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace KanbanBoard.Api.Controllers
@@ -16,7 +17,7 @@ namespace KanbanBoard.Api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetMemberById(int id)
+        public async Task<IActionResult> GetMemberById(Guid id)
         {
             var response = await _mediator.Send(new GetMemberById.Query(id));
 
@@ -43,7 +44,7 @@ namespace KanbanBoard.Api.Controllers
             return Ok();
         }
 
-        [HttpPatch]
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateMember(UpdateMember.Command command)

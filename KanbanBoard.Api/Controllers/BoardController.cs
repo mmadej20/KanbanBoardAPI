@@ -1,9 +1,12 @@
-﻿using KanbanBoard.Application.Boards.Commands;
+﻿using KanbanBoard.Api.Contracts.Board.Reqeusts;
+using KanbanBoard.Api.Mapping;
+using KanbanBoard.Application.Boards.Commands;
 using KanbanBoard.Application.Boards.Errors;
 using KanbanBoard.Application.Boards.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace KanbanBoard.Api.Controllers;
@@ -15,28 +18,29 @@ public class BoardController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     [HttpPost("create")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateBoard(CreateBoard.Command command)
+    public async Task<IActionResult> CreateBoard([FromBody] CreateBoardRequest request)
     {
-        var response = await _mediator.Send(command);
+        var response = await _mediator.Send(new CreateBoard.Command(request.Name));
         if (response.IsFailure)
         {
             return BadRequest(response.Error);
         }
-        return Ok();
+
+        return Created();
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{boardId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetBoardById(int id)
+    public async Task<IActionResult> GetBoardById([FromRoute] Guid boardId)
     {
-        var response = await _mediator.Send(new GetBoardById.Query(id));
+        var response = await _mediator.Send(new GetBoardById.Query(boardId));
         if (response.IsFailure)
         {
-            if (response.Error == BoardServiceErrors.BoardNotFound(id))
+            if (response.Error == BoardServiceErrors.BoardNotFound(boardId))
             {
                 return NotFound(response.Error);
             }
@@ -45,30 +49,37 @@ public class BoardController(IMediator mediator) : ControllerBase
                 return BadRequest(BoardServiceErrors.GenericError);
             }
         }
-        return Ok(response.Value);
+
+        if (response.TryGetValue(out var board))
+        {
+            var boardResponse = board.ToBoardResponse();
+            return Ok(boardResponse);
+        }
+
+        return BadRequest(BoardServiceErrors.GenericError);
     }
 
     [HttpPost("boardItem/create")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateItemInBoard(CreateItemInBoard.Command command)
+    public async Task<IActionResult> CreateItemInBoard([FromBody] CreateItemInBoardRequest request)
     {
-        var response = await _mediator.Send(command);
+        var response = await _mediator.Send(new CreateItemInBoard.Command(request.BoardId, request.Name));
 
         if (response.IsFailure)
         {
             return BadRequest(response.Error);
         }
 
-        return Ok();
+        return Created();
     }
 
     [HttpDelete("delete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteBoard(DeleteBoard.Command command)
+    public async Task<IActionResult> DeleteBoard([FromRoute] Guid boardId)
     {
-        var response = await _mediator.Send(command);
+        var response = await _mediator.Send(new DeleteBoard.Command(boardId));
 
         if (response.IsFailure)
         {
@@ -79,17 +90,17 @@ public class BoardController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("addMember")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AddMemberToBoard(AddMemberToBoard.Command command)
+    public async Task<IActionResult> AddMemberToBoard(AddMemberToBoardRequest request)
     {
-        var response = await _mediator.Send(command);
+        var response = await _mediator.Send(new AddMemberToBoard.Command(request.BoardId, request.MemberId));
 
         if (response.IsFailure)
         {
-            if (response.Error == BoardServiceErrors.BoardNotFound(command.BoardId)
-                || response.Error == BoardServiceErrors.MemberNotFound(command.MemberId))
+            if (response.Error == BoardServiceErrors.BoardNotFound(request.BoardId)
+                || response.Error == BoardServiceErrors.MemberNotFound(request.MemberId))
             {
                 return NotFound(response.Error);
             }
@@ -99,7 +110,7 @@ public class BoardController(IMediator mediator) : ControllerBase
             }
         }
 
-        return Ok();
+        return Created();
     }
 
     [HttpPatch("removeMember")]

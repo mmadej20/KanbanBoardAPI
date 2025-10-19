@@ -3,6 +3,7 @@ using KanbanBoard.Application.BoardItems.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
 
 namespace KanbanBoard.Api.Controllers;
@@ -16,7 +17,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetToDoById(int id)
+    public async Task<IActionResult> GetToDoById(Guid id)
     {
         var response = await _mediator.Send(new GetToDoById.Query(id));
 
@@ -43,30 +44,30 @@ public class BoardItemController(IMediator mediator) : ControllerBase
     //    return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     //}
 
-    [HttpPatch("{id}/complete/")]
+    [HttpPut("{id}/complete/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsCompleted(int id)
+    public async Task<IActionResult> MarkAsCompleted(Guid id)
     {
         var response = await _mediator.Send(new MarkAsCompleted.Command(id));
 
         return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     }
 
-    [HttpPatch("{id}/cancel/")]
+    [HttpPut("{id}/cancel/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsCancelled(int id)
+    public async Task<IActionResult> MarkAsCancelled(Guid id)
     {
         var response = await _mediator.Send(new MarkAsCancelled.Command(id));
 
         return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     }
 
-    [HttpPatch("{id}/inProgress/")]
+    [HttpPut("{id}/inProgress/")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsInProgress(int id)
+    public async Task<IActionResult> MarkAsInProgress(Guid id)
     {
         var response = await _mediator.Send(new MarkAsInProgress.Command(id));
 
