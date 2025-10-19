@@ -19,7 +19,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetToDoById(Guid id)
     {
-        var response = await _mediator.Send(new GetToDoById.Query(id));
+        var response = await _mediator.Send(new GetBoardItemById.Query(id));
 
         return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
     }
@@ -29,7 +29,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAllTasks()
     {
-        var response = await _mediator.Send(new GetAllTasks.Query());
+        var response = await _mediator.Send(new GetAllBoardItems.Query());
 
         return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
     }

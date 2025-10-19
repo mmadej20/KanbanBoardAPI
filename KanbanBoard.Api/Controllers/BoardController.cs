@@ -141,7 +141,7 @@ public class BoardController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AssignMemberToTask(AssignMemberToTask.Command command)
+    public async Task<IActionResult> AssignMemberToTask(AssignMemberToBoardItem.Command command)
     {
         var response = await _mediator.Send(command);
 
