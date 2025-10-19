@@ -3,17 +3,14 @@ using KanbanBoard.Application.Models;
 using KanbanBoard.Application.Services;
 using KanbanBoard.Domain.Entities;
 using MediatR;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace KanbanBoard.Application.BoardItems.Queries;
 
-public class GetAllTasks
+public class GetAllBoardItems
 {
-    public record Query() : IRequest<Result<IList<ToDo>, Error>>;
+    public record Query() : IRequest<Result<IList<BoardItem>, Error>>;
 
-    public class Handler : IRequestHandler<Query, Result<IList<ToDo>, Error>>
+    public class Handler : IRequestHandler<Query, Result<IList<BoardItem>, Error>>
     {
         private readonly IBoardService _kanbanService;
 
@@ -22,7 +19,7 @@ public class GetAllTasks
             _kanbanService = kanbanService;
         }
 
-        public async Task<Result<IList<ToDo>, Error>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<IList<BoardItem>, Error>> Handle(Query request, CancellationToken cancellationToken)
         {
             var result = await _kanbanService.GetAllTasks();
             return result;
