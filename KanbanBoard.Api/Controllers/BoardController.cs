@@ -113,7 +113,7 @@ public class BoardController(IMediator mediator) : ControllerBase
         return Created();
     }
 
-    [HttpPatch("removeMember")]
+    [HttpPut("removeMember")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
