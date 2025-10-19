@@ -17,7 +17,7 @@ namespace KanbanBoard.Api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetMemberById(Guid id)
+        public async Task<IActionResult> GetMemberById([FromRoute] Guid id)
         {
             var response = await _mediator.Send(new GetMemberById.Query(id));
 

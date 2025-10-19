@@ -1,5 +1,8 @@
-﻿using KanbanBoard.Application.BoardItems.Commands;
+﻿using KanbanBoard.Api.Contracts.BoardItem.Requests;
+using KanbanBoard.Application.BoardItems.Commands;
 using KanbanBoard.Application.BoardItems.Queries;
+using KanbanBoard.Application.Boards.Commands;
+using KanbanBoard.Application.Boards.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +20,7 @@ public class BoardItemController(IMediator mediator) : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetToDoById(Guid id)
+    public async Task<IActionResult> GetBoardItemById([FromRoute] Guid id)
     {
         var response = await _mediator.Send(new GetBoardItemById.Query(id));
 
@@ -27,47 +30,61 @@ public class BoardItemController(IMediator mediator) : ControllerBase
     [HttpGet("all")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetAllTasks()
+    public async Task<IActionResult> GetAllBoardItems()
     {
         var response = await _mediator.Send(new GetAllBoardItems.Query());
 
         return response.IsFailure ? NotFound(response.Error) : Ok(response.Value);
     }
 
-    //[HttpPost("add")]
-    //[ProducesResponseType(StatusCodes.Status200OK)]
-    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-    //public async Task<IActionResult> AddToDo(AddToDo.Command command)
-    //{
-    //    var response = await _mediator.Send(command);
+    [HttpPost("assignToBoardItem")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> AssignMemberToBoardItem([FromBody] AssignMemberToBoardItemRequest request)
+    {
+        var response = await _mediator.Send(new AssignMemberToBoardItem.Command(request.TaskId, request.MemberId));
 
-    //    return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
-    //}
+        if (response.IsFailure)
+        {
+            if (response.Error == BoardServiceErrors.ItemNotFound(request.TaskId)
+                || response.Error == BoardServiceErrors.MemberNotFound(request.MemberId))
+            {
+                return NotFound(response.Error);
+            }
+            else
+            {
+                return BadRequest(response.Error);
+            }
+        }
 
-    [HttpPut("{id}/complete/")]
+        return Ok();
+    }
+
+    [HttpPut("{id}/complete")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsCompleted(Guid id)
+    public async Task<IActionResult> MarkAsCompleted([FromRoute] Guid id)
     {
         var response = await _mediator.Send(new MarkAsCompleted.Command(id));
 
         return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     }
 
-    [HttpPut("{id}/cancel/")]
+    [HttpPut("{id}/cancel")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsCancelled(Guid id)
+    public async Task<IActionResult> MarkAsCancelled([FromRoute] Guid id)
     {
         var response = await _mediator.Send(new MarkAsCancelled.Command(id));
 
         return response.IsFailure ? BadRequest(response.Error) : Ok(response.Value);
     }
 
-    [HttpPut("{id}/inProgress/")]
+    [HttpPut("{id}/inProgress")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> MarkAsInProgress(Guid id)
+    public async Task<IActionResult> MarkAsInProgress([FromRoute] Guid id)
     {
         var response = await _mediator.Send(new MarkAsInProgress.Command(id));
 

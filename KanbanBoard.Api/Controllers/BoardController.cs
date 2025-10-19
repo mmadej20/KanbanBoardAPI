@@ -117,38 +117,14 @@ public class BoardController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RemoveMemberFromBoard(RemoveMemberFromBoard.Command command)
+    public async Task<IActionResult> RemoveMemberFromBoard(RemoveMemberFromBoardRequest request)
     {
-        var response = await _mediator.Send(command);
+        var response = await _mediator.Send(new RemoveMemberFromBoard.Command(request.BoardId, request.MemberId));
 
         if (response.IsFailure)
         {
-            if (response.Error == BoardServiceErrors.BoardNotFound(command.BoardId)
-                || response.Error == BoardServiceErrors.MemberNotFound(command.MemberId))
-            {
-                return NotFound(response.Error);
-            }
-            else
-            {
-                return BadRequest(response.Error);
-            }
-        }
-
-        return Ok();
-    }
-
-    [HttpPost("assignToTask")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AssignMemberToTask(AssignMemberToBoardItem.Command command)
-    {
-        var response = await _mediator.Send(command);
-
-        if (response.IsFailure)
-        {
-            if (response.Error == BoardServiceErrors.ItemNotFound(command.TaskId)
-                || response.Error == BoardServiceErrors.MemberNotFound(command.MemberId))
+            if (response.Error == BoardServiceErrors.BoardNotFound(request.BoardId)
+                || response.Error == BoardServiceErrors.MemberNotFound(request.MemberId))
             {
                 return NotFound(response.Error);
             }
