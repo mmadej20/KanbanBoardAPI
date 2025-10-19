@@ -9,7 +9,7 @@ namespace KanbanBoard.DataAccess
 
         public KanbanContext(DbContextOptions options) : base(options) { }
 
-        public virtual DbSet<ToDoEntity> ToDos { get; set; }
+        public virtual DbSet<BoardItemEntity> BoardItems { get; set; }
 
         public virtual DbSet<MemberEntity> Members { get; set; }
 
@@ -17,18 +17,18 @@ namespace KanbanBoard.DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ToDoEntity>()
+            modelBuilder.Entity<BoardItemEntity>()
                 .Property(t => t.Status)
                 .HasConversion<string>();
 
             modelBuilder.Entity<BoardEntity>()
-                .HasMany(b => b.ToDoItems)
+                .HasMany(b => b.BoardItems)
                 .WithOne(t => t.Board)
                 .HasForeignKey(t => t.BoardId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<MemberEntity>()
-                .HasMany(m => m.ToDos)
+                .HasMany(m => m.BoardItems)
                 .WithOne(t => t.AssignedMember)
                 .HasForeignKey(t => t.AssignedMemberId)
                 .OnDelete(DeleteBehavior.SetNull);
@@ -51,7 +51,7 @@ namespace KanbanBoard.DataAccess
             //TODO: Check performance implications of AutoInclude
 
             modelBuilder.Entity<BoardEntity>()
-                .Navigation(b => b.ToDoItems).AutoInclude();
+                .Navigation(b => b.BoardItems).AutoInclude();
 
             modelBuilder.Entity<BoardEntity>()
                 .Navigation(b => b.BoardMembers).AutoInclude();

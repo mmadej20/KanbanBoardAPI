@@ -4,9 +4,9 @@ using System.Text.Json.Serialization;
 
 namespace KanbanBoard.DataAccess.Entities
 {
-    public class ToDoEntity
+    public class BoardItemEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(250)]
@@ -16,12 +16,12 @@ namespace KanbanBoard.DataAccess.Entities
         [MaxLength(100)]
         public required StatusType Status { get; set; }
 
-        public int? BoardId { get; set; }
+        public Guid? BoardId { get; set; }
 
         [JsonIgnore]
         public BoardEntity? Board { get; set; }
 
-        public int? AssignedMemberId { get; set; }
+        public Guid? AssignedMemberId { get; set; }
 
         [JsonIgnore]
         public MemberEntity? AssignedMember { get; set; }

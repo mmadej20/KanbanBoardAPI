@@ -4,7 +4,7 @@ namespace KanbanBoard.DataAccess.Entities
 {
     public class MemberEntity
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -16,6 +16,6 @@ namespace KanbanBoard.DataAccess.Entities
 
         public List<BoardMemberEntity> BoardMembers { get; set; } = [];
 
-        public List<ToDoEntity>? ToDos { get; set; }
+        public List<BoardItemEntity>? BoardItems { get; set; }
     }
 }
