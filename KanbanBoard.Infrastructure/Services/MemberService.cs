@@ -37,7 +37,7 @@ public class MemberService(KanbanContext kanbanContext, IMapper mapper) : IMembe
         return MemberServiceErrors.GenericError;
     }
 
-    public async Task<UnitResult<Error>> DeleteMember(int memberId)
+    public async Task<UnitResult<Error>> DeleteMember(Guid memberId)
     {
         var memberToDelete = await _kanbanContext.Members.FindAsync(memberId);
 
@@ -57,7 +57,21 @@ public class MemberService(KanbanContext kanbanContext, IMapper mapper) : IMembe
         return MemberServiceErrors.GenericError;
     }
 
-    public async Task<Result<Member, Error>> GetMemberById(int memberId)
+    public async Task<Result<Member, Error>> GetMemberByEmail(string email)
+    {
+        var memberEntity = await _kanbanContext.Members.AsNoTracking().FirstOrDefaultAsync(i => i.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
+
+        if (memberEntity is null)
+        {
+            return MemberServiceErrors.MemberNotFound(email);
+        }
+
+        var member = _mapper.Map<Member>(memberEntity);
+
+        return member;
+    }
+
+    public async Task<Result<Member, Error>> GetMemberById(Guid memberId)
     {
         var memberEntity = await _kanbanContext.Members.AsNoTracking().FirstOrDefaultAsync(i => i.Id == memberId);
 
@@ -71,7 +85,7 @@ public class MemberService(KanbanContext kanbanContext, IMapper mapper) : IMembe
         return member;
     }
 
-    public async Task<UnitResult<Error>> UpdateMember(int memberId, string? memberName = null, string? email = null)
+    public async Task<UnitResult<Error>> UpdateMember(Guid memberId, string? memberName = null, string? email = null)
     {
         if (string.IsNullOrEmpty(memberName) && string.IsNullOrEmpty(email))
         {

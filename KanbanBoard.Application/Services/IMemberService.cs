@@ -6,11 +6,13 @@ namespace KanbanBoard.Application.Services;
 
 public interface IMemberService
 {
-    Task<Result<Member, Error>> GetMemberById(int memberId);
+    Task<Result<Member, Error>> GetMemberById(Guid memberId);
+
+    Task<Result<Member, Error>> GetMemberByEmail(string email);
 
     Task<UnitResult<Error>> AddMember(string memberName, string email);
 
-    Task<UnitResult<Error>> UpdateMember(int memberId, string? memberName = null, string? email = null);
+    Task<UnitResult<Error>> UpdateMember(Guid memberId, string? memberName = null, string? email = null);
 
-    Task<UnitResult<Error>> DeleteMember(int memberId);
+    Task<UnitResult<Error>> DeleteMember(Guid memberId);
 }

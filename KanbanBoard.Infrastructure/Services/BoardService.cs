@@ -39,7 +39,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> DeleteBoard(int boardId)
+    public async Task<UnitResult<Error>> DeleteBoard(Guid boardId)
     {
         var boardToRemove = await _repository.Boards.FindAsync(boardId);
 
@@ -61,7 +61,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> AddMemberToBoard(int boardId, int memberId)
+    public async Task<UnitResult<Error>> AddMemberToBoard(Guid boardId, Guid memberId)
     {
         var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
@@ -93,7 +93,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> RemoveMemberFromBoard(int boardId, int memberId)
+    public async Task<UnitResult<Error>> RemoveMemberFromBoard(Guid boardId, Guid memberId)
     {
         var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
@@ -119,9 +119,9 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> AssignMemberToTask(int taskId, int memberId)
+    public async Task<UnitResult<Error>> AssignMemberToTask(Guid taskId, Guid memberId)
     {
-        var taskToAssign = await _repository.ToDos.Include(item => item.Board).FirstOrDefaultAsync(task => task.Id == taskId);
+        var taskToAssign = await _repository.BoardItems.Include(item => item.Board).FirstOrDefaultAsync(task => task.Id == taskId);
 
         if (taskToAssign == null)
         {
@@ -146,7 +146,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
 
         taskToAssign.AssignedMember = memberToAssign;
 
-        _repository.ToDos.Update(taskToAssign);
+        _repository.BoardItems.Update(taskToAssign);
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
@@ -158,7 +158,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> UpdateBoardName(int boardId, string newName)
+    public async Task<UnitResult<Error>> UpdateBoardName(Guid boardId, string newName)
     {
         var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
@@ -178,7 +178,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> AddItemToBoard(int boardId, int itemId)
+    public async Task<UnitResult<Error>> AddItemToBoard(Guid boardId, Guid itemId)
     {
         var boardToUpdate = await _repository.Boards.FindAsync(boardId);
 
@@ -187,14 +187,14 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
             return BoardServiceErrors.BoardNotFound(boardId);
         }
 
-        var itemEntityToAdd = await _repository.ToDos.FindAsync(itemId);
+        var itemEntityToAdd = await _repository.BoardItems.FindAsync(itemId);
 
         if (itemEntityToAdd == null)
         {
             return BoardServiceErrors.ItemNotFound(itemId);
         }
 
-        boardToUpdate.ToDoItems!.Add(itemEntityToAdd);
+        boardToUpdate.BoardItems!.Add(itemEntityToAdd);
 
         if ((await UpdateBoard(boardToUpdate)).IsSuccess)
         {
@@ -205,7 +205,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<UnitResult<Error>> CreateItemInBoard(int boardId, string taskName)
+    public async Task<UnitResult<Error>> CreateItemInBoard(Guid boardId, string taskName)
     {
         var boardToUpdate = await GetBoardById(boardId);
 
@@ -221,7 +221,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
             return newTaskId.Error;
         }
 
-        var newTaskObject = await _repository.ToDos.FindAsync(newTaskId.Value);
+        var newTaskObject = await _repository.BoardItems.FindAsync(newTaskId.Value);
 
         var result = await AddItemToBoard(boardToUpdate.Value.Id, newTaskObject!.Id);
 
@@ -229,7 +229,7 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<Result<Board, Error>> GetBoardById(int boardId)
+    public async Task<Result<Board, Error>> GetBoardById(Guid boardId)
     {
         var boardEntity = await _repository.Boards
             .FirstOrDefaultAsync(b => b.Id == boardId);
@@ -244,9 +244,9 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<Result<int, Error>> AddToDo(string name)
+    public async Task<Result<Guid, Error>> AddToDo(string name)
     {
-        var addedTask = await _repository.ToDos.AddAsync(new ToDoEntity { Status = StatusType.ToDo, Name = name });
+        var addedTask = await _repository.BoardItems.AddAsync(new BoardItemEntity { Status = StatusType.ToDo, Name = name });
         var affectedEntries = await _repository.SaveChangesAsync();
 
         if (affectedEntries > 0)
@@ -258,9 +258,9 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<Result<int, Error>> ChangeStatus(int id, StatusType status)
+    public async Task<Result<int, Error>> ChangeStatus(Guid id, StatusType status)
     {
-        var taskEntity = await _repository.ToDos.FirstOrDefaultAsync(i => i.Id == id);
+        var taskEntity = await _repository.BoardItems.FirstOrDefaultAsync(i => i.Id == id);
 
         if (taskEntity == null)
         {
@@ -279,31 +279,31 @@ public class BoardService(KanbanContext kanbanContext, IMapper mapper) : IBoardS
     }
 
     /// <inheritdoc/>
-    public async Task<Result<IList<ToDo>, Error>> GetAllTasks()
+    public async Task<Result<IList<BoardItem>, Error>> GetAllTasks()
     {
-        var toDosListEntity = await _repository.ToDos.ToListAsync();
+        var toDosListEntity = await _repository.BoardItems.ToListAsync();
 
-        if (toDosListEntity == null || !toDosListEntity.Any())
+        if (toDosListEntity == null || toDosListEntity.Count == 0)
         {
             return BoardServiceErrors.NoTasksFound;
         }
 
-        var toDosList = _mapper.Map<List<ToDo>>(toDosListEntity);
+        var toDosList = _mapper.Map<List<BoardItem>>(toDosListEntity);
 
         return toDosList;
     }
 
     /// <inheritdoc/>
-    public async Task<Result<ToDo, Error>> GetToDoById(int id)
+    public async Task<Result<BoardItem, Error>> GetToDoById(Guid id)
     {
-        var todoEntity = await _repository.ToDos.FirstOrDefaultAsync(x => x.Id == id);
+        var todoEntity = await _repository.BoardItems.FirstOrDefaultAsync(x => x.Id == id);
 
         if (todoEntity == null)
         {
             return BoardServiceErrors.ItemNotFound(id);
         }
 
-        var todo = _mapper.Map<ToDo>(todoEntity);
+        var todo = _mapper.Map<BoardItem>(todoEntity);
 
         return todo;
     }
