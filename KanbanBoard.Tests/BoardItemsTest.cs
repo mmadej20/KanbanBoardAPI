@@ -1,10 +1,10 @@
 using KanbanBoard.Domain.Entities;
 using KanbanBoard.Domain.Enums;
 using KanbanBoard.Infrastructure.Services;
-using KanbanBoard.Tests.DatabaseFixture;
+using KanbanBoard.IntegrationTests.DatabaseFixture;
 using Shouldly;
 
-namespace KanbanBoard.Tests
+namespace KanbanBoard.IntegrationTests
 {
     [ClassDataSource(typeof(KanbanDatabaseFixture))]
     public class BoardItemsTest
@@ -13,7 +13,7 @@ namespace KanbanBoard.Tests
         private static BoardService _boardService;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        [Before(HookType.Class)]
+        [Before(Class)]
         public static void Initialize()
         {
             _boardService = ServicesWithFixtureDatabase.GetBoardService();
@@ -25,7 +25,7 @@ namespace KanbanBoard.Tests
         {
             var result = await _boardService.AddToDo("TestTask");
 
-            result.ShouldNotBe(-1);
+            result.IsSuccess.ShouldBeTrue();
         }
 
         [Test]
@@ -34,18 +34,18 @@ namespace KanbanBoard.Tests
         {
             var tasks = await _boardService.GetAllTasks();
             tasks.IsSuccess.ShouldBe(true);
-            tasks.Value.ShouldBeOfType<List<ToDo?>>();
+            tasks.Value.ShouldBeOfType<List<BoardItem?>>();
         }
 
         [Test]
         [NotInParallel]
         public async Task StatusShouldBeChangeToInProgress()
         {
-            var result = await _boardService.ChangeStatus(2, StatusType.InProgress);
+            var result = await _boardService.ChangeStatus(KanbanDatabaseFixture.FirstTaskGuid, StatusType.InProgress);
 
             result.IsSuccess.ShouldBe(true);
 
-            var inProgressTask = await _boardService.GetToDoById(2);
+            var inProgressTask = await _boardService.GetToDoById(KanbanDatabaseFixture.FirstTaskGuid);
 
             inProgressTask.IsSuccess.ShouldBe(true);
             inProgressTask.Value.Status.ToString().ShouldBe(StatusType.InProgress.ToString());

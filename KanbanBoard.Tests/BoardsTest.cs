@@ -1,15 +1,15 @@
 ﻿using KanbanBoard.Application.Services;
-using KanbanBoard.Tests.DatabaseFixture;
+using KanbanBoard.IntegrationTests.DatabaseFixture;
 using Shouldly;
 
-namespace KanbanBoard.Tests
+namespace KanbanBoard.IntegrationTests
 {
     [ClassDataSource(typeof(KanbanDatabaseFixture))]
     public class BoardsTest
     {
         private static IBoardService _boardService;
 
-        [Before(HookType.Class)]
+        [Before(Class)]
         public static void Initialize()
         {
             _boardService = ServicesWithFixtureDatabase.GetBoardService();
@@ -27,14 +27,14 @@ namespace KanbanBoard.Tests
 
         [Test]
         [NotInParallel]
-        [Arguments(1, "Task assigned to board of id 1")]
-        public async Task TaskShouldBeAssignedToBoard(int boardId, string taskName)
+        [Arguments("Task assigned to board of id 1")]
+        public async Task TaskShouldBeAssignedToBoard(string taskName)
         {
-            await _boardService.CreateItemInBoard(boardId, taskName);
-            var boardWithTask = await _boardService.GetBoardById(boardId);
+            await _boardService.CreateItemInBoard(KanbanDatabaseFixture.FirstBoardGuid, taskName);
+            var boardWithTask = await _boardService.GetBoardById(KanbanDatabaseFixture.FirstBoardGuid);
 
             boardWithTask.IsSuccess.ShouldBe(true);
-            var taskFromBoard = boardWithTask.Value.ToDoItems?.FirstOrDefault(x => x.Name == taskName);
+            var taskFromBoard = boardWithTask.Value.BoardItems?.FirstOrDefault(x => x.Name == taskName);
 
             taskFromBoard?.Name.ShouldBe(taskName);
         }
@@ -43,12 +43,12 @@ namespace KanbanBoard.Tests
         [NotInParallel]
         public async Task DeleteBoardShouldDeleteAssignedTasks()
         {
-            var board = await _boardService.GetBoardById(2);
+            var board = await _boardService.GetBoardById(KanbanDatabaseFixture.SecondBoardGuid);
 
             board.IsSuccess.ShouldBe(true);
-            var taskAssignedToBoard = board.Value.ToDoItems?.FirstOrDefault();
+            var taskAssignedToBoard = board.Value.BoardItems?.FirstOrDefault();
 
-            await _boardService.DeleteBoard(2);
+            await _boardService.DeleteBoard(KanbanDatabaseFixture.SecondBoardGuid);
 
             var result = await _boardService.GetToDoById(taskAssignedToBoard!.Id);
 

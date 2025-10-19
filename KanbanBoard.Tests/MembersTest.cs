@@ -1,10 +1,10 @@
 ﻿using KanbanBoard.Application.Members.Errors;
 using KanbanBoard.Infrastructure.Services;
-using KanbanBoard.Tests.DatabaseFixture;
+using KanbanBoard.IntegrationTests.DatabaseFixture;
 using Shouldly;
 using TUnit.Core.Logging;
 
-namespace KanbanBoard.Tests
+namespace KanbanBoard.IntegrationTests
 {
     [ClassDataSource(typeof(KanbanDatabaseFixture))]
     public class MembersTest
@@ -14,13 +14,13 @@ namespace KanbanBoard.Tests
         private static DefaultLogger _output;
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
 
-        [Before(HookType.Class)]
+        [Before(Class)]
         public static void InitializeDatabase()
         {
             _memberService = ServicesWithFixtureDatabase.GetMemberService();
         }
 
-        [Before(HookType.Test)]
+        [Before(Test)]
         public void InitializeLogger()
         {
             _output = TestContext.Current!.GetDefaultLogger();
@@ -56,9 +56,9 @@ namespace KanbanBoard.Tests
         [Arguments("User1Updated")]
         public async Task MemberShouldBeUpdatedWithNewName(string newName)
         {
-            await _memberService.UpdateMember(1, newName);
+            await _memberService.UpdateMember(KanbanDatabaseFixture.FirstMemberGuid, newName);
 
-            var updatedMember = await _memberService.GetMemberById(1);
+            var updatedMember = await _memberService.GetMemberById(KanbanDatabaseFixture.FirstMemberGuid);
             updatedMember.IsSuccess.ShouldBe(true);
 
             _output.LogInformation($"Updated member name: {updatedMember.Value.MemberName}");
@@ -69,9 +69,9 @@ namespace KanbanBoard.Tests
         [NotInParallel]
         public async Task MemberShouldBeRemoved()
         {
-            await _memberService.DeleteMember(2);
+            await _memberService.DeleteMember(KanbanDatabaseFixture.SecondMemberGuid);
 
-            var deletedMember = await _memberService.GetMemberById(2);
+            var deletedMember = await _memberService.GetMemberById(KanbanDatabaseFixture.SecondMemberGuid);
             deletedMember.IsFailure.ShouldBe(true);
         }
     }
